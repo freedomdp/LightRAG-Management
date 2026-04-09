@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Graph Database
+  neo4j:
+    image: neo4j:latest
+    container_name: lightrag_neo4j
+    ports:
+      - "7474:7474"   # HTTP
+      - "7687:7687"   # Bolt
+    environment:
+      - NEO4J_AUTH=${NEO4J_USERNAME}/${NEO4J_PASSWORD}
+      - NEO4J_PLUGINS=["apoc"]
+    volumes:
+      - ./neo4j_data:/data
+      - ./neo4j_logs:/logs
+    networks:
+      - lightrag_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: lightrag_qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./qdrant_data:/qdrant/storage
+    networks:
+      - lightrag_net
+
+  # LightRAG Server
+  lightrag:
+    image: ghcr.io/hkuds/lightrag:latest
+    container_name: lightrag_api
+    ports:
+      - "9621:9621"
+    env_file:
+      - .env
+    volumes:
+      - ./rag_storage:/rag_storage
+      - ./scripts:/scripts
+      - ./docs/experience:/docs/experience
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - lightrag_net
+
+networks:
+  lightrag_net:
+    driver: bridge
+
+volumes:
+  neo4j_data:
+  qdrant_data:
+  rag_storage:

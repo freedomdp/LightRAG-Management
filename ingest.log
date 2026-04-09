@@ -1,0 +1,13 @@
+2026-04-08 19:56:29,130 - INFO - Found 4 files for ingestion.
+2026-04-08 19:56:29,130 - INFO - [1/4] Ingesting ai_avtomatyzatsia_3.md...
+2026-04-08 19:56:29,131 - INFO - Processing: docs/notebook_content/ai_avtomatyzatsia_3.md
+2026-04-08 19:56:29,319 - INFO - Successfully ingested docs/notebook_content/ai_avtomatyzatsia_3.md. API Response: {'status': 'duplicated', 'message': "File source 'docs/notebook_content/ai_avtomatyzatsia_3.md' already exists in document storage (Status: DocStatus.PROCESSED).", 'track_id': 'insert_20260408_153017_40f1d06d'}
+2026-04-08 19:56:30,325 - INFO - [2/4] Ingesting antigravity_n8n_guide.md...
+2026-04-08 19:56:30,326 - INFO - Processing: docs/notebook_content/antigravity_n8n_guide.md
+2026-04-08 19:56:30,343 - INFO - Successfully ingested docs/notebook_content/antigravity_n8n_guide.md. API Response: {'status': 'duplicated', 'message': "File source 'docs/notebook_content/antigravity_n8n_guide.md' already exists in document storage (Status: DocStatus.PROCESSED).", 'track_id': 'insert_20260408_153018_9416753e'}
+2026-04-08 19:56:31,346 - INFO - [3/4] Ingesting lightrag_brain_video.md...
+2026-04-08 19:56:31,347 - INFO - Processing: docs/notebook_content/lightrag_brain_video.md
+2026-04-08 19:56:31,364 - INFO - Successfully ingested docs/notebook_content/lightrag_brain_video.md. API Response: {'status': 'duplicated', 'message': "File source 'docs/notebook_content/lightrag_brain_video.md' already exists in document storage (Status: DocStatus.PROCESSED).", 'track_id': 'insert_20260408_153019_000aff51'}
+2026-04-08 19:56:32,369 - INFO - [4/4] Ingesting lightrag_youtube_transcript.md...
+2026-04-08 19:56:32,369 - INFO - Processing: docs/notebook_content/lightrag_youtube_transcript.md
+2026-04-08 19:56:32,377 - INFO - Successfully ingested docs/notebook_content/lightrag_youtube_transcript.md. API Response: {'status': 'duplicated', 'message': "File source 'docs/notebook_content/lightrag_youtube_transcript.md' already exists in document storage (Status: DocStatus.PROCESSED).", 'track_id': 'insert_20260408_153020_c0949942'}
