@@ -103,6 +103,62 @@ async def log_new_experience(title: str, content: str) -> str:
     except Exception as e:
         return f"Ошибка при сохранении опыта: {str(e)}"
 
+@mcp.tool()
+async def sync_tasks(action: str, task_text: str = None) -> str:
+    """
+    Управление файлом task.md проекта.
+    
+    Args:
+        action: 'read' - прочитать задачи, 'add' - добавить задачу, 'toggle' - отметить как сделано/не сделано.
+        task_text: Текст задачи (обязателен для add и toggle).
+    """
+    # Путь к task.md в корне проекта
+    task_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "task.md")
+    
+    if not os.path.exists(task_file):
+        with open(task_file, "w", encoding="utf-8") as f:
+            f.write("# Список задач проекта\n\n")
+
+    if action == "read":
+        with open(task_file, "r", encoding="utf-8") as f:
+            return f"📋 Текущие задачи:\n\n{f.read()}"
+
+    elif action == "add":
+        if not task_text:
+            return "❌ Ошибка: task_text обязателен для добавления."
+        with open(task_file, "a", encoding="utf-8") as f:
+            f.write(f"- [ ] {task_text}\n")
+        return f"✅ Задача добавлена: {task_text}"
+
+    elif action == "toggle":
+        if not task_text:
+            return "❌ Ошибка: task_text нужен, чтобы найти задачу."
+        
+        with open(task_file, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        
+        found = False
+        new_lines = []
+        for line in lines:
+            if task_text in line and "- [" in line:
+                if "[ ]" in line:
+                    line = line.replace("[ ]", "[x]")
+                    state = "выполнена"
+                else:
+                    line = line.replace("[x]", "[ ]")
+                    state = "не выполнена"
+                found = True
+            new_lines.append(line)
+        
+        if found:
+            with open(task_file, "w", encoding="utf-8") as f:
+                f.writelines(new_lines)
+            return f"✅ Статус задачи '{task_text}' изменен на '{state}'."
+        else:
+            return f"❌ Задача с текстом '{task_text}' не найдена."
+
+    return "❌ Неизвестное действие (action)."
+
 if __name__ == "__main__":
     # Запускаем MCP сервер через stdio
     mcp.run(transport='stdio')
