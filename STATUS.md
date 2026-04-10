@@ -1,51 +1,49 @@
-# 📊 Живой Статус LightRAG
-Последнее обновление: `2026-04-10 20:20:28` (Обновляется автоматически каждые 60 сек)
+# 📊 Живой Статус LightRAG (V15.7 "Honest & Clean")
+Обновлено: `2026-04-11 00:20:43` (Авто-обновление: 60 сек)
 
-## 🚀 Приемка файлов в очередь
-- **Статус**: ✅ Завершено
-- **Прогресс**: `[442/442]` (100.00%)
-- **Последний файл**: `new_lightrag_youtube_transcript.md`
+## 🕹️ Панель Управления
+- **ПАУЗА (Безопасная)**: `./scripts/pause.sh`
+- **ПРОДОЛЖИТЬ**: `./scripts/resume.sh`
 
-## 🧠 Реальная обработка (Neo4j)
-- **Статус**: 🧠 Обрабатывается LLM
-- **Прогресс**: `[232/442]` (52.49%)
-| **Узлы Neo4j (Сущности)** | 12666 |
-| **Связи Neo4j (Relationships)** | 12496 |
-| **Статус Ollama** | Активна (Обработка данных) |
+## ⚡ Статус Индексации: ⌛ Завершение (Ждем высвобождения GPU...)
+- **Реальная обработка (Neo4j)**: `[241/442]` (54.52%)
+- **Активность LLM (GPU/Ollama)**: 💤 LLM простаивает
 
-### 🛠️ Здоровье компонентов
-| Компонент | Статус |
-| :--- | :--- |
-| **Docker: LightRAG API** | ✅ Online |
-| **Docker: Neo4j** | ✅ Online |
-| **Docker: Qdrant** | ✅ Online |
-| **LLM: Gemma 4 (Ollama)** | ✅ Active |
+### 🖥️ Системные ресурсы (Docker & Mac)
+| Компонент / Контейнер | Нагрузка (CPU %) | RAM / Mem | Статус |
+| :--- | :--- | :--- | :--- |
+| **Ollama (Metal GPU)** | 5.3% | N/A | ✅ Active |
+| **LightRAG API** | 0.58% | 485.7MiB | ✅ Online |
+| **Neo4j DB** | 2.28% | 975.2MiB | ✅ Online |
+| **Qdrant DB** | 13.14% | 267MiB | ✅ Online |
 
 ---
 
-## 📜 Недавняя активность (Логи API)
+## 📜 Недавняя активность (Самые новые - сверху)
 ```text
-INFO: Merged: `I Tried 536+ AI Tools, These 7 Will Explode Your Business in 2026`~`Sabri Suby` | 1+1
-INFO: Chunks appended from relation: `Risk Management`
-INFO: Chunks appended from relation: `YouTube Account`
-INFO: Chunks appended from relation: `Video Content`
-INFO: Chunks appended from relation: `YouTube Video`
-INFO: Merged: `Evan Carmichael`~`The Diary Of A CEO` | 1+1
-INFO: Chunks appended from relation: `Warren Buffett`
-INFO: Merged: `Passive Income Expert`~`Warren Buffett` | 1+1
-INFO: Merged: `Joe Kent`~`Tucker Carlson` | 1+1
-INFO: Merged: `Evan Carmichael`~`Steve Jobs` | 1+1
-INFO: Phase 3: Updating final 107(103+4) entities and  82 relations from doc-995011965c0b2d2dfa4c4f1d62a8750a
-INFO: Completed merging: 103 entities, 4 extra entities, 82 relations
-INFO: In memory DB persist to disk
-INFO: Completed processing file 10/183: docs/notebook_content/new_5_Boring_Businesses_That_Will_Make_Millionaires_in_2026___YouTube_part1.md
-INFO: Extracting stage 11/183: docs/notebook_content/new_5_Boring_Businesses_That_Will_Make_Millionaires_in_2026___YouTube_part2.md
-INFO: Processing d-id: doc-7d262430ba8f76218e4b1606bf44b23a
-INFO: Chunk 1 of 20 extracted 5 Ent + 0 Rel chunk-68dbaa335dcfdfeb82dd0f8e76be24e2
-INFO: Chunk 2 of 20 extracted 4 Ent + 0 Rel chunk-a2e39068856a06adc705442fea7fe1a9
-INFO: Chunk 3 of 20 extracted 8 Ent + 1 Rel chunk-54bd52726dc679f674b7523b76b03a3a
-INFO: Chunk 4 of 20 extracted 4 Ent + 2 Rel chunk-8f00bda6bca34d6e6068a846a1101690
-INFO: Chunk 5 of 20 extracted 4 Ent + 0 Rel chunk-2df177de65fcc1b4eb6c637c9fbefb1a
-INFO:  == LLM cache == saving: default:extract:d3eec2d1518c18014b30a36ac5ecc48b
-INFO: Chunk 6 of 20 extracted 13 Ent + 7 Rel chunk-f9119082aaef3556527fa0e7c5cf9df8
+[00:06:21] INFO - [SYSTEM] >>> PAUSE REQUESTED BY USER
+[22:29:04] INFO - [SYSTEM] ||| SOFT PAUSE ACHIEVED. SAFE TO SLEEP. Stopping ingestion loop.
+[22:29:03] INFO - [SYSTEM] >>> PAUSE REQUESTED BY USER
+[22:29:03] INFO - Processing: docs/notebook_content/new_1f797b28_e789_434e_ab70_95a3ca29d610_part3.md
+[22:29:02] INFO - Processing: docs/notebook_content/new_1f797b28_e789_434e_ab70_95a3ca29d610_part2.md
+[22:29:01] INFO - Processing: docs/notebook_content/new_1f797b28_e789_434e_ab70_95a3ca29d610_part1.md
+[22:29:00] INFO - Processing: docs/notebook_content/new_1a7fb0c0_b383_4edf_abbe_04901e60fe13_part4.md
+[22:28:59] INFO - Processing: docs/notebook_content/new_1a7fb0c0_b383_4edf_abbe_04901e60fe13_part3.md
+[22:28:58] INFO - Processing: docs/notebook_content/new_1a7fb0c0_b383_4edf_abbe_04901e60fe13_part2.md
+[22:28:57] INFO - Processing: docs/notebook_content/new_1a7fb0c0_b383_4edf_abbe_04901e60fe13_part1.md
+[22:28:56] INFO - Processing: docs/notebook_content/new_100_hours_of_AntiGravity_lessons_in_47_minutes_part8.md
+[22:28:55] INFO - Processing: docs/notebook_content/new_100_hours_of_AntiGravity_lessons_in_47_minutes_part7.md
+[22:28:54] INFO - Processing: docs/notebook_content/new_100_hours_of_AntiGravity_lessons_in_47_minutes_part6.md
+[22:28:53] INFO - Processing: docs/notebook_content/new_100_hours_of_AntiGravity_lessons_in_47_minutes_part5.md
+[22:28:52] INFO - Processing: docs/notebook_content/new_100_hours_of_AntiGravity_lessons_in_47_minutes_part4.md
+[22:28:51] INFO - Processing: docs/notebook_content/new_100_hours_of_AntiGravity_lessons_in_47_minutes_part3.md
+[22:28:50] INFO - Processing: docs/notebook_content/new_100_hours_of_AntiGravity_lessons_in_47_minutes_part2.md
+[22:28:49] INFO - Processing: docs/notebook_content/new_100_hours_of_AntiGravity_lessons_in_47_minutes_part1.md
+[22:28:48] INFO - Processing: docs/notebook_content/new_05f1ac8e_be1e_424b_b453_bdbae9b7dc9b.md
+[22:28:47] INFO - Processing: docs/notebook_content/new_05b3ab0c_130d_43d1_bbb6_4cab6471bfa9_part3.md
+[22:28:46] INFO - Processing: docs/notebook_content/new_05b3ab0c_130d_43d1_bbb6_4cab6471bfa9_part2.md
+[22:28:45] INFO - Processing: docs/notebook_content/new_05b3ab0c_130d_43d1_bbb6_4cab6471bfa9_part1.md
 ```
+
+> [!TIP]
+> Статус "На Паузе" появится только когда GPU физически остынет. Новые события в логах теперь отображаются мгновенно в начале списка.
