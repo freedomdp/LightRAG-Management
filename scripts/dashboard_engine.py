@@ -132,46 +132,67 @@ class DashboardEngine:
     def build_dashboard(self):
         now = time.time()
         
-        # 1. Get ingest status
+        # 0. Physical folder scan (B - Total Docs)
+        CONTENT_DIR = "docs/notebook_content"
+        try:
+            # Get all .md files in the folder
+            files_in_folder = [f for f in os.listdir(CONTENT_DIR) if f.endswith(".md")]
+            total_doc_physical = len(files_in_folder)
+        except Exception:
+            files_in_folder = []
+            total_doc_physical = 0
+
+        # 1. Get ingest status (to know what file is active)
         ingest_data = self.get_ingest_status()
-        current_doc = ingest_data.get("current", 0)
-        total_doc = ingest_data.get("total", 0)
         last_file = ingest_data.get("last_file", "N/A")
         
-        doc_str = f"[{current_doc}/{total_doc}]"
-        if total_doc > 0:
-            doc_percent = round((current_doc / total_doc) * 100, 2)
-            doc_str += f" ({doc_percent}%)"
-
-        # Check documentation logic trigger
-        if current_doc > self.state["last_doc_current"]:
-            self._log_event(f"📄 Документ обработан: {last_file}")
-            self.state["last_doc_current"] = current_doc
-            self.state["last_doc_name"] = last_file
-            self.state["last_doc_update_time"] = now
-            self.save_state()
-
-        # 2. Get chunk status
+        # 2. Get chunk status and update Indexed List (A)
         chunk_data = self.parse_chunk_status()
         chunk_str_display = "N/A"
-        chunk_str_internal = ""
+        is_chunking_active = False
+        
         if chunk_data:
-            chunk_str_display = f"[{chunk_data[0]}/{chunk_data[1]}]"
-            chunk_str_internal = f"{chunk_data[0]}/{chunk_data[1]}"
+            c_now, c_total = int(chunk_data[0]), int(chunk_data[1])
+            chunk_str_display = f"[{c_now}/{c_total}]"
             
-            if chunk_str_internal != self.state.get("last_chunk", ""):
+            # Check if current file just finished its chunks
+            if c_now == c_total and c_total > 0:
+                if last_file != "N/A" and last_file not in self.state.get("indexed_files", []):
+                    if "indexed_files" not in self.state:
+                        self.state["indexed_files"] = []
+                    self.state["indexed_files"].append(last_file)
+                    self._log_event(f"✅ Документ полностью проиндексирован (Neo4j): {last_file}")
+                    self.save_state()
+            elif c_now < c_total:
+                is_chunking_active = True
+            
+            if chunk_str_display != self.state.get("last_chunk", ""):
                 self._log_event(f"🧩 Обработан чанк {chunk_str_display} в текущем документе")
-                self.state["last_chunk"] = chunk_str_internal
+                self.state["last_chunk"] = chunk_str_display
                 self.state["last_chunk_update_time"] = now
                 self.save_state()
+
+        # 3. Calculate Real Processing (A - Processed)
+        # Ensure we only count indexed files that are ACTIVE in the folder (not deleted)
+        current_indexed_list = [f for f in self.state.get("indexed_files", []) if f in files_in_folder]
+        count_indexed = len(current_indexed_list)
+        
+        doc_percent = 0.0
+        if total_doc_physical > 0:
+            doc_percent = (count_indexed / total_doc_physical) * 100
+        
+        doc_str = f"[{count_indexed}/{total_doc_physical}] ({round(doc_percent, 1)}%)"
 
         # 3. Detect Stuck / General Status
         is_stalled = self.check_stuck_status(now)
         
-        if current_doc == 0 and total_doc == 0:
+        if count_indexed == 0 and total_doc_physical == 0:
             general_status = "Покой (Ожидание)"
-        elif current_doc >= total_doc and total_doc > 0:
-            general_status = "Завершение"
+        elif count_indexed >= total_doc_physical and total_doc_physical > 0:
+            if is_chunking_active:
+                general_status = "Индексация (Финальные чанки)"
+            else:
+                general_status = "Завершение"
         else:
             if is_stalled:
                 general_status = "🛑 ЗАВИСАНИЕ (Требуется вмешательство)"
