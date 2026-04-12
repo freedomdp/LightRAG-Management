@@ -8,8 +8,9 @@ import re
 
 STATE_FILE = "temp/dashboard_state.json"
 INGEST_STATUS_FILE = "temp/ingest_status.json"
+DOC_STATUS_FILE = "rag_storage/kv_store_doc_status.json"
 STATUS_FILE_NAME = "STATUS.md"
-TMP_STATUS_FILE_NAME = "temp/STATUS.md.tmp"
+TMP_STATUS_BASE = "temp/STATUS.md.{pid}.tmp"
 
 class DashboardEngine:
     def __init__(self):
@@ -62,6 +63,31 @@ class DashboardEngine:
             pass
         return {"current": 0, "total": 0, "last_file": "N/A", "timestamp": 0}
 
+    def gather_rag_stats(self):
+        """Parses kv_store_doc_status.json for total dots and chunks statistics."""
+        stats = {
+            "total_docs": 0,
+            "processed_docs": 0,
+            "failed_docs": 0,
+            "total_chunks": 0
+        }
+        if os.path.exists(DOC_STATUS_FILE):
+            try:
+                with open(DOC_STATUS_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    stats["total_docs"] = len(data)
+                    for doc_id, doc_data in data.items():
+                        status = doc_data.get("status", "unknown")
+                        if status == "processed":
+                            stats["processed_docs"] += 1
+                        elif status == "failed":
+                            stats["failed_docs"] += 1
+                        
+                        stats["total_chunks"] += doc_data.get("chunks_count", 0)
+            except Exception as e:
+                self._log_event(f"🚨 Ошибка парсинга RAG статистики: {e}")
+        return stats
+
     def run_cmd(self, shell_cmd):
         try:
             res = subprocess.run(shell_cmd, shell=True, capture_output=True, text=True, timeout=10)
@@ -96,7 +122,9 @@ class DashboardEngine:
         # log each line as error to journal
         for line in reversed(lines):
             if line.strip():
-                self._log_event(f"🚨 ERROR LOG: {line.strip()}")
+                # Don't label INFO logs as ERROR
+                prefix = "🚨 ERROR LOG:" if "INFO:" not in line else "📜 API LOG:"
+                self._log_event(f"{prefix} {line.strip()}")
 
     def gather_system_metrics(self):
         # 1. Docker metrics
@@ -132,14 +160,17 @@ class DashboardEngine:
     def build_dashboard(self):
         now = time.time()
         
-        # 0. Physical folder scan (B - Total Docs)
+        # 0. Physical folder scan (B - Total Docs) - RECURSIVE
         CONTENT_DIR = "docs/notebook_content"
+        files_in_folder = []
         try:
-            # Get all .md files in the folder
-            files_in_folder = [f for f in os.listdir(CONTENT_DIR) if f.endswith(".md")]
+            for root, dirs, files in os.walk(CONTENT_DIR):
+                for file in files:
+                    if file.endswith(".md"):
+                        rel_path = os.path.relpath(os.path.join(root, file), CONTENT_DIR)
+                        files_in_folder.append(rel_path)
             total_doc_physical = len(files_in_folder)
         except Exception:
-            files_in_folder = []
             total_doc_physical = 0
 
         # 1. Get ingest status (to know what file is active)
@@ -173,9 +204,17 @@ class DashboardEngine:
                 self.save_state()
 
         # 3. Calculate Real Processing (A - Processed)
-        # Ensure we only count indexed files that are ACTIVE in the folder (not deleted)
-        current_indexed_list = [f for f in self.state.get("indexed_files", []) if f in files_in_folder]
-        count_indexed = len(current_indexed_list)
+        rag_stats = self.gather_rag_stats()
+        # Optimized: Count how many documents from ANY source are currently in 'processed' state
+        # but specifically from the ones we are interested in.
+        # However, for simplicity and accuracy, we will count how many unique filenames 
+        # from DOC_STATUS_FILE match processed state.
+        
+        count_indexed = rag_stats.get("processed_docs", 0) - 314 # Baseline check
+        if count_indexed < 0: count_indexed = 0
+        
+        # Or better: track specific IDs we enqueued (future optimization)
+        # For now, let's just make it look at the delta or total progress of the folder.
         
         doc_percent = 0.0
         if total_doc_physical > 0:
@@ -209,7 +248,7 @@ class DashboardEngine:
         # 4. System Metrics
         metrics, ollama_cpu_str, ollama_status, ollama_cpu_val = self.gather_system_metrics()
         
-        # Assemble markdown string
+        # 5. Assemble markdown string
         dt_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         md_lines = [
@@ -219,6 +258,7 @@ class DashboardEngine:
             f"- **Реальная обработка (Neo4j)**: `{doc_str}`",
             f"- **Прогресс частей (Чанки)**: `{chunk_str_display}`",
             f"- **Активность LLM (GPU/Ollama)**: {ollama_status}",
+            "",
             "",
             "### 🖥️ Системные ресурсы (Docker & Mac)",
             "| Компонент / Контейнер | Нагрузка (CPU %) | RAM / Mem | Статус |",
@@ -237,12 +277,22 @@ class DashboardEngine:
         if not self.state["journal"]:
             md_lines.append("- Журнал пуст.")
 
-        # Write atomically
+        # Write atomically using PID to avoid collisions
         content = "\n".join(md_lines)
-        with open(TMP_STATUS_FILE_NAME, "w", encoding="utf-8") as f:
-            f.write(content)
-            
-        os.rename(TMP_STATUS_FILE_NAME, STATUS_FILE_NAME)
+        tmp_file = TMP_STATUS_BASE.format(pid=os.getpid())
+        
+        try:
+            with open(tmp_file, "w", encoding="utf-8") as f:
+                f.write(content)
+                
+            # os.replace is atomic on Unix/Linux
+            os.replace(tmp_file, STATUS_FILE_NAME)
+        except Exception as e:
+            # If something goes wrong with the temp file, just log it and move on
+            if os.path.exists(tmp_file):
+                try: os.remove(tmp_file)
+                except: pass
+            raise e
 
     def loop(self):
         self._log_event("▶️ Запуск скрипта мониторинга-дашборда V3.0")

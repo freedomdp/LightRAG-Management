@@ -68,27 +68,37 @@ def main():
         logger.error(f"Directory {CONTENT_DIR} not found.")
         return
 
-    files = sorted([f for f in os.listdir(CONTENT_DIR) if f.endswith('.md')])
-    if not files:
+    # Recursive search for .md files
+    all_files = []
+    for root, dirs, files in os.walk(CONTENT_DIR):
+        for file in files:
+            if file.endswith('.md'):
+                # Store relative path from CONTENT_DIR
+                rel_path = os.path.relpath(os.path.join(root, file), CONTENT_DIR)
+                all_files.append(rel_path)
+    
+    all_files.sort()
+    
+    if not all_files:
         logger.warning(f"No .md files found in {CONTENT_DIR}")
         return
 
-    total = len(files)
+    total = len(all_files)
     logger.info(f"Found {total} files for ingestion.")
     
-    for i, filename in enumerate(files):
+    for i, rel_filename in enumerate(all_files):
         current_idx = i + 1
-        filepath = os.path.join(CONTENT_DIR, filename)
+        filepath = os.path.join(CONTENT_DIR, rel_filename)
         
-        logger.info(f"[{current_idx}/{total}] Ingesting {filename}...")
-        update_status(current_idx, total, filename)
+        logger.info(f"[{current_idx}/{total}] Ingesting {rel_filename}...")
+        update_status(current_idx, total, rel_filename)
         
         success = ingest_file(filepath)
         
         if success:
             time.sleep(1) # Delay between documents
         else:
-            logger.error(f"Failed to ingest {filename}, continuing with next...")
+            logger.error(f"Failed to ingest {rel_filename}, continuing with next...")
 
 if __name__ == "__main__":
     main()

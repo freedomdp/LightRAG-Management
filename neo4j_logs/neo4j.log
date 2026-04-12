@@ -310,3 +310,42 @@
 2026-04-11 20:15:19.817+0000 INFO  name: system
 2026-04-11 20:15:19.818+0000 INFO  creationDate: 2026-04-08T21:17:17.214Z
 2026-04-11 20:15:19.819+0000 INFO  Started.
+2026-04-12 07:37:22.256+0000 INFO  Neo4j Server shutdown initiated by request
+2026-04-12 07:37:22.477+0000 INFO  Stopping...
+2026-04-12 09:13:18.436+0000 INFO  Logging config in use: File '/var/lib/neo4j/conf/user-logs.xml'
+2026-04-12 09:13:18.448+0000 INFO  Starting...
+2026-04-12 09:13:18.993+0000 INFO  This instance is ServerId{4c92d3bb} (4c92d3bb-ba49-4409-8d6d-6d28faff0e01)
+2026-04-12 09:13:20.011+0000 INFO  ======== Neo4j 2026.03.1 ========
+2026-04-12 09:13:20.396+0000 INFO  X-Forward header processing enabled with security controls
+2026-04-12 09:13:20.396+0000 WARN  SECURITY WARNING: X-Forward headers accepted from any source - configure allow_proxies
+2026-04-12 09:13:20.397+0000 WARN  SECURITY WARNING: X-Forward headers accept any hostname - configure allow_hosts
+2026-04-12 09:13:21.973+0000 INFO  Anonymous Usage Data is being sent to Neo4j, see https://neo4j.com/docs/usage-data/
+2026-04-12 09:13:22.369+0000 WARN  Java vector incubator module is not readable. For optimal vector performance, pass '--add-modules jdk.incubator.vector' to enable Vector API.
+2026-04-12 09:13:23.001+0000 INFO  This server has built-in support for online monitoring through Fleet Manager. Visit https://console.neo4j.io to get started!
+2026-04-12 09:13:23.379+0000 INFO  Bolt enabled on 0.0.0.0:7687.
+2026-04-12 09:13:25.067+0000 INFO  HTTP enabled on 0.0.0.0:7474.
+2026-04-12 09:13:25.074+0000 INFO  Remote interface available at http://localhost:7474/
+2026-04-12 09:13:25.093+0000 INFO  id: 17715C438FE5A69CEADEE56CCD6B6446B6BC0AE370A3F3C5267B8DB765F14A5A
+2026-04-12 09:13:25.094+0000 INFO  name: system
+2026-04-12 09:13:25.095+0000 INFO  creationDate: 2026-04-08T21:17:17.214Z
+2026-04-12 09:13:25.096+0000 INFO  Started.
+2026-04-12 09:14:43.152+0000 INFO  Neo4j Server shutdown initiated by request
+2026-04-12 09:14:43.279+0000 INFO  Stopping...
+2026-04-12 09:30:03.544+0000 INFO  Logging config in use: File '/var/lib/neo4j/conf/user-logs.xml'
+2026-04-12 09:30:03.580+0000 INFO  Starting...
+2026-04-12 09:30:04.300+0000 INFO  This instance is ServerId{4c92d3bb} (4c92d3bb-ba49-4409-8d6d-6d28faff0e01)
+2026-04-12 09:30:05.026+0000 INFO  ======== Neo4j 2026.03.1 ========
+2026-04-12 09:30:05.495+0000 INFO  X-Forward header processing enabled with security controls
+2026-04-12 09:30:05.495+0000 WARN  SECURITY WARNING: X-Forward headers accepted from any source - configure allow_proxies
+2026-04-12 09:30:05.496+0000 WARN  SECURITY WARNING: X-Forward headers accept any hostname - configure allow_hosts
+2026-04-12 09:30:06.740+0000 INFO  Anonymous Usage Data is being sent to Neo4j, see https://neo4j.com/docs/usage-data/
+2026-04-12 09:30:07.014+0000 WARN  Java vector incubator module is not readable. For optimal vector performance, pass '--add-modules jdk.incubator.vector' to enable Vector API.
+2026-04-12 09:30:07.202+0000 INFO  Bolt enabled on 0.0.0.0:7687.
+2026-04-12 09:30:07.742+0000 INFO  This server has built-in support for online monitoring through Fleet Manager. Visit https://console.neo4j.io to get started!
+2026-04-12 09:30:08.473+0000 INFO  HTTP enabled on 0.0.0.0:7474.
+2026-04-12 09:30:08.474+0000 INFO  Remote interface available at http://localhost:7474/
+2026-04-12 09:30:08.476+0000 INFO  id: 17715C438FE5A69CEADEE56CCD6B6446B6BC0AE370A3F3C5267B8DB765F14A5A
+2026-04-12 09:30:08.476+0000 INFO  name: system
+2026-04-12 09:30:08.477+0000 INFO  creationDate: 2026-04-08T21:17:17.214Z
+2026-04-12 09:30:08.477+0000 INFO  Started.
+2026-04-12 09:55:14.871+0000 WARN  [bolt-163] The client is unauthorized due to authentication failure.
