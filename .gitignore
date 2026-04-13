@@ -6,15 +6,20 @@ qdrant_data/
 # Бэкапы и временные файлы
 backups/
 temp/
-docs/experience/mcp_debug.log
-docs/experience/mcp_wrapper.log
-scripts/dashboard.log
-scripts/dashboard_restart.log
-scripts/re-ingest.log
-scripts/reanimation.log
+
+# Логи (все уровни)
+*.log
+*.log.*
+scripts/*.log
+scripts/**/*.log
+ingest.log
+
+# Статус-файлы (авто-генерация)
+scripts/ingest_status.json
 
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 .venv/
@@ -25,3 +30,8 @@ env/
 .DS_Store
 .idea/
 .vscode/
+
+# Временные файлы данных
+*.broken
+*.corrupt
+*.bak
