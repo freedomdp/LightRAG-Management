@@ -90,7 +90,7 @@ class DashboardEngine:
 
     def run_cmd(self, shell_cmd):
         try:
-            res = subprocess.run(shell_cmd, shell=True, capture_output=True, text=True, timeout=10)
+            res = subprocess.run(shell_cmd, shell=True, capture_output=True, text=True, timeout=30)
             return res.stdout.strip()
         except subprocess.TimeoutExpired:
             return "Timeout"
@@ -128,18 +128,31 @@ class DashboardEngine:
 
     def gather_system_metrics(self):
         # 1. Docker metrics
-        docker_raw = self.run_cmd('docker stats --no-stream --format "{{.Name}}|{{.CPUPerc}}|{{.MemUsage}}" lightrag_api lightrag_neo4j lightrag_qdrant')
-        metrics = {"lightrag_api": {"cpu": "N/A", "ram": "N/A", "status": "🛑 Offline"},
-                   "lightrag_neo4j": {"cpu": "N/A", "ram": "N/A", "status": "🛑 Offline"},
-                   "lightrag_qdrant": {"cpu": "N/A", "ram": "N/A", "status": "🛑 Offline"}}
+        # Optimized: get specific metrics for our containers
+        container_names = ["lightrag_api", "lightrag_neo4j", "lightrag_qdrant"]
+        metrics = {name: {"cpu": "N/A", "ram": "N/A", "status": "🛑 Offline"} for name in container_names}
+        
+        # Check basic presence first to avoid timeout confusion
+        ps_raw = self.run_cmd('docker ps --format "{{.Names}}"')
+        active_containers = ps_raw.split("\n") if ps_raw and "Timeout" not in ps_raw else []
+        
+        docker_raw = self.run_cmd('docker stats --no-stream --format "{{.Name}}|{{.CPUPerc}}|{{.MemUsage}}" ' + " ".join(container_names))
         
         if docker_raw and "Timeout" not in docker_raw:
             for line in docker_raw.split("\n"):
                 parts = line.split("|")
                 if len(parts) == 3:
-                    name, cpu, ram = parts
-                    mem_actual = ram.split(" / ")[0]  # Extracts basically just the used format like 485.7MiB
-                    metrics[name] = {"cpu": cpu, "ram": mem_actual, "status": "✅ Online"}
+                    name, cpu, ram = [p.strip() for p in parts]
+                    # On some systems name might have a leading slash
+                    clean_name = name.lstrip('/')
+                    if clean_name in metrics:
+                        mem_actual = ram.split(" / ")[0].strip()
+                        metrics[clean_name] = {"cpu": cpu, "ram": mem_actual, "status": "✅ Online"}
+        else:
+            # Fallback to simple Online/Offline if stats failed but ps saw them
+            for name in container_names:
+                if any(name in c for c in active_containers):
+                    metrics[name]["status"] = "✅ Online (Metrics N/A)"
 
         # 2. Ollama metrics
         ollama_ps = self.run_cmd('ps -A -o %cpu,command | grep ollama | grep -v grep')
@@ -176,8 +189,34 @@ class DashboardEngine:
         # 1. Get ingest status (to know what file is active)
         ingest_data = self.get_ingest_status()
         last_file = ingest_data.get("last_file", "N/A")
+        ingest_ts = ingest_data.get("timestamp", 0)
+        current_ingest_index = ingest_data.get("current", 0)
         
-        # 2. Get chunk status and update Indexed List (A)
+        # 2. Get RAG stats
+        rag_stats = self.gather_rag_stats()
+        current_rag_total = rag_stats.get('processed_docs', 0)
+        active_work = rag_stats.get("pending_docs", 0) + rag_stats.get("processing_docs", 0)
+        
+        # 2b. Smart Sticky Baseline Calibration
+        state_ingest_ts = self.state.get("last_ingest_ts", 0)
+        baseline = self.state.get("baseline_rag_count", 0)
+
+        # TRIGGER 1: New batch started (current reset to 1)
+        if current_ingest_index == 1 and ingest_ts > state_ingest_ts:
+             baseline = max(0, current_rag_total - 1)
+             self.state["baseline_rag_count"] = baseline
+             self.state["last_ingest_ts"] = ingest_ts
+             self._log_event(f"🔄 СТАРТ НОВОЙ ПАЧКИ. Baseline RAG: {baseline}")
+             self.save_state()
+        
+        # TRIGGER 2: Lost baseline (restart mid-batch)
+        elif (baseline == 0 or baseline > current_rag_total) and current_ingest_index > 0:
+             baseline = max(0, current_rag_total - current_ingest_index)
+             self.state["baseline_rag_count"] = baseline
+             self._log_event(f"🎯 АВТО-КАЛИБРОВКА Baseline: {baseline}")
+             self.save_state()
+
+        # 3. Get chunk status
         chunk_data = self.parse_chunk_status()
         chunk_str_display = "N/A"
         is_chunking_active = False
@@ -186,13 +225,11 @@ class DashboardEngine:
             c_now, c_total = int(chunk_data[0]), int(chunk_data[1])
             chunk_str_display = f"[{c_now}/{c_total}]"
             
-            # Check if current file just finished its chunks
             if c_now == c_total and c_total > 0:
                 if last_file != "N/A" and last_file not in self.state.get("indexed_files", []):
-                    if "indexed_files" not in self.state:
-                        self.state["indexed_files"] = []
+                    if "indexed_files" not in self.state: self.state["indexed_files"] = []
                     self.state["indexed_files"].append(last_file)
-                    self._log_event(f"✅ Документ полностью проиндексирован (Neo4j): {last_file}")
+                    self._log_event(f"✅ Документ проиндексирован (Neo4j): {last_file}")
                     self.save_state()
             elif c_now < c_total:
                 is_chunking_active = True
@@ -203,51 +240,52 @@ class DashboardEngine:
                 self.state["last_chunk_update_time"] = now
                 self.save_state()
 
-        # 3. Calculate Real Processing (A - Processed)
-        rag_stats = self.gather_rag_stats()
-        # Optimized: Count how many documents from ANY source are currently in 'processed' state
-        # but specifically from the ones we are interested in.
-        # However, for simplicity and accuracy, we will count how many unique filenames 
-        # from DOC_STATUS_FILE match processed state.
+        # 4. Calculate Real Progress
+        count_indexed = max(0, current_rag_total - baseline)
+        batch_total = max(total_doc_physical, count_indexed + active_work)
         
-        count_indexed = rag_stats.get("processed_docs", 0) - 314 # Baseline check
-        if count_indexed < 0: count_indexed = 0
-        
-        # Or better: track specific IDs we enqueued (future optimization)
-        # For now, let's just make it look at the delta or total progress of the folder.
-        
-        doc_percent = 0.0
-        if total_doc_physical > 0:
-            doc_percent = (count_indexed / total_doc_physical) * 100
-        
-        doc_str = f"[{count_indexed}/{total_doc_physical}] ({round(doc_percent, 1)}%)"
+        if current_ingest_index > count_indexed and current_ingest_index <= batch_total:
+            count_indexed = current_ingest_index
 
-        # 3. Detect Stuck / General Status
-        is_stalled = self.check_stuck_status(now)
+        doc_percent = 0.0
+        if batch_total > 0:
+            doc_percent = (count_indexed / batch_total) * 100
         
-        if count_indexed == 0 and total_doc_physical == 0:
+        doc_str = f"[{count_indexed}/{batch_total}] ({round(doc_percent, 1)}%)"
+        rag_total_str = f"{current_rag_total} (всего в базе)"
+        queue_str = f"- **Очередь API**: `{active_work} док.` (Pending/Processing)" if active_work > 0 else ""
+
+        # 5. Get Metrics & Determine Status
+        metrics, ollama_cpu_str, ollama_status, ollama_cpu_total = self.gather_system_metrics()
+        is_stalled = self.check_stuck_status(now)
+        is_hard_working = ollama_cpu_total > 5.0 or metrics.get('lightrag_neo4j', {}).get('cpu', 0) > 5.0
+        
+        if count_indexed == 0 and total_doc_physical == 0 and active_work == 0:
             general_status = "Покой (Ожидание)"
-        elif count_indexed >= total_doc_physical and total_doc_physical > 0:
-            if is_chunking_active:
-                general_status = "Индексация (Финальные чанки)"
+        elif count_indexed >= batch_total and active_work == 0:
+            if is_hard_working or is_chunking_active:
+                general_status = "Индексация (Финальная сборка графа)"
             else:
-                general_status = "Завершение"
+                general_status = "Завершен"
         else:
             if is_stalled:
-                general_status = "🛑 ЗАВИСАНИЕ (Требуется вмешательство)"
+                general_status = "🛑 ЗАВИСАНИЕ"
                 if not self.state.get("stall_logged"):
                     self.capture_error_log()
                     self.state["stall_logged"] = True
                     self.save_state()
             else:
-                general_status = "Индексация"
+                if active_work > 0:
+                     general_status = f"Индексация ({active_work} в очереди)"
+                elif now - ingest_ts > 600:
+                     general_status = "Ожидание / Завершение"
+                else:
+                     general_status = "Индексация"
+                
                 if self.state.get("stall_logged"):
                     self.state["stall_logged"] = False
                     self.save_state()
 
-        # 4. System Metrics
-        metrics, ollama_cpu_str, ollama_status, ollama_cpu_val = self.gather_system_metrics()
-        
         # 5. Assemble markdown string
         dt_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
@@ -255,8 +293,16 @@ class DashboardEngine:
             f"Обновлено: `{dt_str}` (Авто-обновление: 60 сек)",
             "",
             f"## ⚡ Статус Индексации: {general_status}",
-            f"- **Реальная обработка (Neo4j)**: `{doc_str}`",
+            f"- **Прогресс пачки**: `{doc_str}`"
+        ]
+        
+        if queue_str:
+            md_lines.append(queue_str.strip())
+            
+        md_lines.extend([
+            f"- **Всего в RAG**: `{rag_total_str}`",
             f"- **Прогресс частей (Чанки)**: `{chunk_str_display}`",
+            f"- **Лимиты ресурсов (Throttling)**: `✅ Active (Max 80% CPU)`",
             f"- **Активность LLM (GPU/Ollama)**: {ollama_status}",
             "",
             "",

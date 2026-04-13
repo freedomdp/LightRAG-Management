@@ -96,7 +96,7 @@ def main():
         success = ingest_file(filepath)
         
         if success:
-            time.sleep(1) # Delay between documents
+            time.sleep(12) # Delay between documents to allow system cooling
         else:
             logger.error(f"Failed to ingest {rel_filename}, continuing with next...")
 
