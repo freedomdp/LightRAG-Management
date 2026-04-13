@@ -3,6 +3,8 @@ import json
 import os
 import time
 import logging
+import hashlib
+import re
 
 # Setup logging
 logging.basicConfig(
@@ -12,8 +14,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 API_URL = "http://localhost:9621/documents/text"
-CONTENT_DIR = "docs/notebook_content"
+CONTENT_DIR = "docs/knowledge"
 STATUS_FILE = "temp/ingest_status.json"
+REGISTRY_FILE = "temp/ingest_registry.json"
 
 def update_status(current, total, filename):
     try:
@@ -28,7 +31,26 @@ def update_status(current, total, filename):
     except Exception as e:
         logger.error(f"Failed to update status file: {e}")
 
-def ingest_file(filepath):
+def register_mapping(doc_id, filename):
+    try:
+        os.makedirs("temp", exist_ok=True)
+        registry = {}
+        if os.path.exists(REGISTRY_FILE):
+            with open(REGISTRY_FILE, "r") as f:
+                registry = json.load(f)
+        
+        registry[doc_id] = {
+            "filename": filename,
+            "registered_at": time.time()
+        }
+        
+        with open(REGISTRY_FILE, "w") as f:
+            json.dump(registry, f, indent=2)
+        logger.info(f"Registered mapping: {doc_id} -> {filename}")
+    except Exception as e:
+        logger.error(f"Failed to update registry: {e}")
+
+def ingest_file(filepath, rel_filename):
     """Ingests a single file into LightRAG API."""
     logger.info(f"Processing: {filepath}")
     
@@ -51,16 +73,30 @@ def ingest_file(filepath):
         
         with urllib.request.urlopen(req, timeout=3600) as response:
             res_data = json.loads(response.read().decode())
-            logger.info(f"Successfully ingested {filepath}. API Response: {res_data}")
+            
+            # Try to extract doc_id from response
+            doc_id = res_data.get("doc_id")
+            
+            # If duplicated, doc_id is in the message string
+            if not doc_id and res_data.get("status") == "duplicated":
+                message = res_data.get("message", "")
+                match = re.search(r"doc_id: (doc-[a-f0-9]+)", message)
+                if match:
+                    doc_id = match.group(1)
+            
+            if doc_id:
+                register_mapping(doc_id, rel_filename)
+                logger.info(f"Successfully processed {filepath}. DocID: {doc_id}")
+            else:
+                logger.warning(f"Could not resolve DocID for {filepath}. API Response: {res_data}")
+            
             return True
             
     except urllib.error.URLError as e:
         logger.error(f"Network error processing {filepath}: {e}")
         return False
     except Exception as e:
-        logger.error(f"Error successfully requesting {filepath}: {e}, skipping to next...")
-        return False
-        logger.error(f"Failed to ingest {filepath}: {str(e)}")
+        logger.error(f"Error successfully requesting {filepath}: {e}")
         return False
 
 def main():
@@ -93,7 +129,7 @@ def main():
         logger.info(f"[{current_idx}/{total}] Ingesting {rel_filename}...")
         update_status(current_idx, total, rel_filename)
         
-        success = ingest_file(filepath)
+        success = ingest_file(filepath, rel_filename)
         
         if success:
             time.sleep(12) # Delay between documents to allow system cooling

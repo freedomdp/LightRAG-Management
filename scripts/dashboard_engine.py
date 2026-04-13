@@ -8,11 +8,23 @@ import re
 
 STATE_FILE = "temp/dashboard_state.json"
 INGEST_STATUS_FILE = "temp/ingest_status.json"
+INGEST_REGISTRY_FILE = "temp/ingest_registry.json"
 DOC_STATUS_FILE = "rag_storage/kv_store_doc_status.json"
 STATUS_FILE_NAME = "STATUS.md"
 TMP_STATUS_BASE = "temp/STATUS.md.{pid}.tmp"
 
 class DashboardEngine:
+    def _clean_val(self, val):
+        """Converts string percentages and values to float for comparison."""
+        if isinstance(val, (int, float)): return float(val)
+        if not val or val == "N/A": return 0.0
+        try:
+            # Remove %, MiB, GB, etc.
+            clean = re.sub(r'[^\d.]+', '', val.replace(',', '.'))
+            return float(clean) if clean else 0.0
+        except Exception:
+            return 0.0
+
     def __init__(self):
         self.state = {
             "journal": [],
@@ -23,7 +35,17 @@ class DashboardEngine:
             "last_chunk_update_time": time.time(),
             "stall_logged": False
         }
+        self.registry = {}
         self.load_state()
+        self.load_registry()
+
+    def load_registry(self):
+        if os.path.exists(INGEST_REGISTRY_FILE):
+            try:
+                with open(INGEST_REGISTRY_FILE, "r", encoding="utf-8") as f:
+                    self.registry = json.load(f)
+            except Exception:
+                pass
 
     def load_state(self):
         if os.path.exists(STATE_FILE):
@@ -63,29 +85,48 @@ class DashboardEngine:
             pass
         return {"current": 0, "total": 0, "last_file": "N/A", "timestamp": 0}
 
+    def safe_load_json(self, filepath, max_retries=3):
+        """Safely loads a JSON file with retry logic to handle concurrent write issues."""
+        for i in range(max_retries):
+            try:
+                if not os.path.exists(filepath):
+                    return None
+                with open(filepath, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except json.JSONDecodeError:
+                if i < max_retries - 1:
+                    time.sleep(0.1) # Wait for write to finish
+                    continue
+                raise
+            except Exception:
+                return None
+        return None
+
     def gather_rag_stats(self):
-        """Parses kv_store_doc_status.json for total dots and chunks statistics."""
+        """Parses kv_store_doc_status.json for total docs and chunks statistics."""
         stats = {
             "total_docs": 0,
             "processed_docs": 0,
             "failed_docs": 0,
+            "pending_docs": 0,
             "total_chunks": 0
         }
-        if os.path.exists(DOC_STATUS_FILE):
-            try:
-                with open(DOC_STATUS_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    stats["total_docs"] = len(data)
-                    for doc_id, doc_data in data.items():
-                        status = doc_data.get("status", "unknown")
-                        if status == "processed":
-                            stats["processed_docs"] += 1
-                        elif status == "failed":
-                            stats["failed_docs"] += 1
-                        
-                        stats["total_chunks"] += doc_data.get("chunks_count", 0)
-            except Exception as e:
-                self._log_event(f"🚨 Ошибка парсинга RAG статистики: {e}")
+        try:
+            data = self.safe_load_json(DOC_STATUS_FILE)
+            if data:
+                stats["total_docs"] = len(data)
+                for doc_id, doc_data in data.items():
+                    status = doc_data.get("status", "unknown")
+                    if status == "processed":
+                        stats["processed_docs"] += 1
+                    elif status == "failed":
+                        stats["failed_docs"] += 1
+                    else:
+                        stats["pending_docs"] += 1
+                    
+                    stats["total_chunks"] += doc_data.get("chunks_count", 0)
+        except Exception as e:
+            self._log_event(f"🚨 Ошибка парсинга RAG статистики: {e}")
         return stats
 
     def run_cmd(self, shell_cmd):
@@ -98,20 +139,36 @@ class DashboardEngine:
             return str(e)
 
     def parse_chunk_status(self):
-        """Runs docker logs --tail 100 lightrag_api and gets the last chunk progress"""
-        logs = self.run_cmd("docker logs --tail 100 lightrag_api 2>&1")
-        # Find all chunks, extract the last one
-        matches = re.findall(r"Chunk (\d+) of (\d+)", logs)
-        if matches:
-            return matches[-1] # tuple ('X', 'Y')
-        return None
+        """Runs docker logs --tail 200 lightrag_api and gets the last chunk progress and doc_id"""
+        logs = self.run_cmd("docker logs --tail 200 lightrag_api 2>&1")
+        
+        # 1. Catch [X/Y] chunks
+        chunk_matches = re.findall(r"Chunk (\d+) of (\d+)", logs)
+        chunk_info = chunk_matches[-1] if chunk_matches else None
+        
+        # 2. Catch DocID mapping from log context
+        # Look for "Processing d-id: doc-xxxx" or "doc-xxxxx (async: X)"
+        doc_matches = re.findall(r"(doc-[a-f0-9]{32})", logs)
+        active_doc_id = doc_matches[-1] if doc_matches else None
+        
+        active_filename = "Unknown Document"
+        if active_doc_id and active_doc_id in self.registry:
+            active_filename = self.registry[active_doc_id].get("filename", "N/A")
+        elif active_doc_id:
+            active_filename = f"Background Indexing ({active_doc_id[:8]}...)"
 
-    def check_stuck_status(self, now):
-        """Checks if process is stalled for > 5 minutes (300 secs)"""
+        return chunk_info, active_filename
+
+    def check_stuck_status(self, now, is_working=False):
+        """Checks if process is stalled for > 10 minutes (600 secs)"""
+        if is_working:
+            return False # Cannot be stuck if CPU is high or chunks are moving
+            
         doc_idle = now - self.state.get("last_doc_update_time", now)
         chunk_idle = now - self.state.get("last_chunk_update_time", now)
         
-        if doc_idle > 300 and chunk_idle > 300:
+        # Increased to 10 minutes because local Neo4j indexing is very slow on large docs
+        if doc_idle > 600 and chunk_idle > 600:
             return True
         return False
 
@@ -173,94 +230,99 @@ class DashboardEngine:
     def build_dashboard(self):
         now = time.time()
         
-        # 0. Physical folder scan (B - Total Docs) - RECURSIVE
-        CONTENT_DIR = "docs/notebook_content"
+        # 0. Physical folder scan (Ground Truth Total)
+        CONTENT_DIR = "docs/knowledge"
         files_in_folder = []
         try:
-            for root, dirs, files in os.walk(CONTENT_DIR):
-                for file in files:
-                    if file.endswith(".md"):
-                        rel_path = os.path.relpath(os.path.join(root, file), CONTENT_DIR)
-                        files_in_folder.append(rel_path)
+            if os.path.exists(CONTENT_DIR):
+                for f in os.listdir(CONTENT_DIR):
+                    if f.endswith(".md"):
+                        files_in_folder.append(f)
             total_doc_physical = len(files_in_folder)
         except Exception:
             total_doc_physical = 0
 
-        # 1. Get ingest status (to know what file is active)
+        # 1. Get RAG stats (Ground Truth Processed)
+        rag_stats = self.gather_rag_stats()
+        
+        # Cross-reference with registry for accurate batch progress
+        self.load_registry()
+        processed_count = 0
+        doc_status_data = self.safe_load_json(DOC_STATUS_FILE) or {}
+        
+        for doc_id, info in self.registry.items():
+            if doc_status_data.get(doc_id, {}).get("status") == "processed":
+                processed_count += 1
+        
+        # 2. Get ingest status for "Current Activity"
         ingest_data = self.get_ingest_status()
         last_file = ingest_data.get("last_file", "N/A")
-        ingest_ts = ingest_data.get("timestamp", 0)
-        current_ingest_index = ingest_data.get("current", 0)
         
-        # 2. Get RAG stats
-        rag_stats = self.gather_rag_stats()
-        current_rag_total = rag_stats.get('processed_docs', 0)
-        active_work = rag_stats.get("pending_docs", 0) + rag_stats.get("processing_docs", 0)
-        
-        # 2b. Smart Sticky Baseline Calibration
-        state_ingest_ts = self.state.get("last_ingest_ts", 0)
-        baseline = self.state.get("baseline_rag_count", 0)
-
-        # TRIGGER 1: New batch started (current reset to 1)
-        if current_ingest_index == 1 and ingest_ts > state_ingest_ts:
-             baseline = max(0, current_rag_total - 1)
-             self.state["baseline_rag_count"] = baseline
-             self.state["last_ingest_ts"] = ingest_ts
-             self._log_event(f"🔄 СТАРТ НОВОЙ ПАЧКИ. Baseline RAG: {baseline}")
-             self.save_state()
-        
-        # TRIGGER 2: Lost baseline (restart mid-batch)
-        elif (baseline == 0 or baseline > current_rag_total) and current_ingest_index > 0:
-             baseline = max(0, current_rag_total - current_ingest_index)
-             self.state["baseline_rag_count"] = baseline
-             self._log_event(f"🎯 АВТО-КАЛИБРОВКА Baseline: {baseline}")
-             self.save_state()
-
         # 3. Get chunk status
-        chunk_data = self.parse_chunk_status()
+        chunk_info, active_filename = self.parse_chunk_status()
         chunk_str_display = "N/A"
         is_chunking_active = False
         
-        if chunk_data:
-            c_now, c_total = int(chunk_data[0]), int(chunk_data[1])
+        if chunk_info:
+            c_now, c_total = int(chunk_info[0]), int(chunk_info[1])
             chunk_str_display = f"[{c_now}/{c_total}]"
-            
-            if c_now == c_total and c_total > 0:
-                if last_file != "N/A" and last_file not in self.state.get("indexed_files", []):
-                    if "indexed_files" not in self.state: self.state["indexed_files"] = []
-                    self.state["indexed_files"].append(last_file)
-                    self._log_event(f"✅ Документ проиндексирован (Neo4j): {last_file}")
-                    self.save_state()
-            elif c_now < c_total:
+            if c_now < c_total:
                 is_chunking_active = True
             
             if chunk_str_display != self.state.get("last_chunk", ""):
-                self._log_event(f"🧩 Обработан чанк {chunk_str_display} в текущем документе")
+                self._log_event(f"🧩 Обработан чанк {chunk_str_display} в документе: {active_filename}")
+                self.state["last_chunk"] = chunk_str_display
+                self.state["last_chunk_update_time"] = now
+                self.save_state()
+             
+        # 3. Get chunk status & active file
+        chunk_info, active_filename = self.parse_chunk_status()
+        chunk_str_display = "N/A"
+        is_chunking_active = False
+        
+        if chunk_info:
+            c_now, c_total = int(chunk_info[0]), int(chunk_info[1])
+            chunk_str_display = f"[{c_now}/{c_total}]"
+            
+            # Use active_filename from registry instead of last_file fallback
+            if c_now == c_total and c_total > 0:
+                if active_filename != "Unknown Document" and active_filename not in self.state.get("indexed_files", []):
+                    if "indexed_files" not in self.state: self.state["indexed_files"] = []
+                    self.state["indexed_files"].append(active_filename)
+                    self._log_event(f"✅ Документ проиндексирован (Neo4j): {active_filename}")
+                    self.save_state()
+            else:
+                is_chunking_active = True
+            
+            if chunk_str_display != self.state.get("last_chunk", ""):
+                self._log_event(f"🧩 Обработан чанк {chunk_str_display} в документе: {active_filename}")
                 self.state["last_chunk"] = chunk_str_display
                 self.state["last_chunk_update_time"] = now
                 self.save_state()
 
-        # 4. Calculate Real Progress
-        count_indexed = max(0, current_rag_total - baseline)
-        batch_total = max(total_doc_physical, count_indexed + active_work)
+        # 4. Final Progress Logic (Direct Calculation)
+        batch_total = total_doc_physical
+        count_indexed = processed_count
         
-        if current_ingest_index > count_indexed and current_ingest_index <= batch_total:
-            count_indexed = current_ingest_index
-
-        doc_percent = 0.0
-        if batch_total > 0:
-            doc_percent = (count_indexed / batch_total) * 100
+        doc_percent = (count_indexed / batch_total * 100) if batch_total > 0 else 0.0
         
         doc_str = f"[{count_indexed}/{batch_total}] ({round(doc_percent, 1)}%)"
-        rag_total_str = f"{current_rag_total} (всего в базе)"
-        queue_str = f"- **Очередь API**: `{active_work} док.` (Pending/Processing)" if active_work > 0 else ""
+        rag_total_str = f"{rag_stats.get('processed_docs', 0)} (всего в базе)"
+        
+        active_work = rag_stats.get("total_docs", 0) - rag_stats.get("processed_docs", 0)
+        queue_str = f"- **Очередь RAG**: `{active_work} док.` (Pending/Indexing)" if active_work > 0 else ""
 
         # 5. Get Metrics & Determine Status
         metrics, ollama_cpu_str, ollama_status, ollama_cpu_total = self.gather_system_metrics()
-        is_stalled = self.check_stuck_status(now)
-        is_hard_working = ollama_cpu_total > 5.0 or metrics.get('lightrag_neo4j', {}).get('cpu', 0) > 5.0
         
-        if count_indexed == 0 and total_doc_physical == 0 and active_work == 0:
+        # CPU values for comparison
+        neo4j_cpu = self._clean_val(metrics.get('lightrag_neo4j', {}).get('cpu', 0))
+        api_cpu = self._clean_val(metrics.get('lightrag_api', {}).get('cpu', 0))
+        is_hard_working = ollama_cpu_total > 5.0 or neo4j_cpu > 10.0 or api_cpu > 10.0
+        
+        is_stalled = self.check_stuck_status(now, is_working=(is_hard_working or is_chunking_active))
+        
+        if count_indexed == 0 and batch_total == 0 and active_work == 0:
             general_status = "Покой (Ожидание)"
         elif count_indexed >= batch_total and active_work == 0:
             if is_hard_working or is_chunking_active:
@@ -275,12 +337,11 @@ class DashboardEngine:
                     self.state["stall_logged"] = True
                     self.save_state()
             else:
-                if active_work > 0:
-                     general_status = f"Индексация ({active_work} в очереди)"
-                elif now - ingest_ts > 600:
-                     general_status = "Ожидание / Завершение"
+                if is_hard_working or active_work > 0:
+                     reason = "в очереди" if active_work > 0 else "активно"
+                     general_status = f"Индексация ({reason})"
                 else:
-                     general_status = "Индексация"
+                     general_status = "Ожидание / Завершение"
                 
                 if self.state.get("stall_logged"):
                     self.state["stall_logged"] = False
@@ -315,7 +376,7 @@ class DashboardEngine:
             f"| **Qdrant DB** | {metrics['lightrag_qdrant']['cpu']} | {metrics['lightrag_qdrant']['ram']} | {metrics['lightrag_qdrant']['status']} |",
             "",
             "## 📜 Недавняя активность (Самые новые - сверху)"
-        ]
+        ])
 
         for item in self.state["journal"]:
             md_lines.append(f"- {item}")
