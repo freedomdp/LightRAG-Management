@@ -1,120 +1,119 @@
-Обновлено: `2026-04-14 02:06:11` (Авто-обновление: 60 сек)
+Обновлено: `2026-04-14 14:09:25` (Авто-обновление: 60 сек)
 
-## ⚡ Статус Индексации: Индексация (в очереди)
-- **Прогресс пачки**: `[1/10] (10.0%)`
-- **Очередь RAG**: `20 док.` (Pending/Indexing)
-- **Всего в RAG**: `385 (всего в базе)`
-- **Прогресс частей (Чанки)**: `[5/5]`
+## ⚡ Статус Индексации: Завершен
+- **Прогресс пачки**: `[22/21] (104.8%)`
+- **Всего в RAG**: `412 (всего в базе)`
+- **Прогресс частей (Чанки)**: `[3/3]`
 - **Лимиты ресурсов (Throttling)**: `✅ Active (Max 80% CPU)`
-- **Активность LLM (GPU/Ollama)**: ✅ Active
+- **Активность LLM (GPU/Ollama)**: 💤 LLM простаивает
 
 
 ### 🖥️ Системные ресурсы (Docker & Mac)
 | Компонент / Контейнер | Нагрузка (CPU %) | RAM / Mem | Статус |
 | :--- | :--- | :--- | :--- |
-| **Ollama (Metal GPU)** | 25.50% | N/A | ✅ Active |
-| **LightRAG API** | 102.07% | 469.4MiB | ✅ Online |
-| **Neo4j DB** | 127.91% | 635.4MiB | ✅ Online |
-| **Qdrant DB** | 7.09% | 207.2MiB | ✅ Online |
+| **Ollama (Metal GPU)** | 0.00% | N/A | 💤 LLM простаивает |
+| **LightRAG API** | 0.50% | 544.1MiB | ✅ Online |
+| **Neo4j DB** | 0.77% | 673.4MiB | ✅ Online |
+| **Qdrant DB** | 0.70% | 208.5MiB | ✅ Online |
 
 ## 📜 Недавняя активность (Самые новые - сверху)
-- [02:03:43] ✅ Документ проиндексирован (Neo4j): business_value_ai_agents.md
-- [02:00:26] 🧩 Обработан чанк [5/5] в документе: ai_factory_1.8_manifesto.md
-- [01:58:19] 🧩 Обработан чанк [3/5] в документе: ai_factory_1.8_manifesto.md
-- [01:56:12] 🧩 Обработан чанк [2/5] в документе: ai_factory_1.8_manifesto.md
-- [01:54:07] 🧩 Обработан чанк [1/5] в документе: ai_factory_1.8_manifesto.md
-- [01:50:51] ✅ Документ проиндексирован (Neo4j): ai_factory_1.8_manifesto.md
-- [01:48:31] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-c27d...)
-- [01:46:24] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-c27d...)
-- [01:44:18] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-c27d...)
-- [01:38:24] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-c27d...)
-- [01:33:59] 🧩 Обработан чанк [2/2] в документе: Background Indexing (doc-9303...)
-- [01:31:40] 🧩 Обработан чанк [1/2] в документе: Background Indexing (doc-9303...)
-- [01:27:22] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-9303...)
-- [01:20:05] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-3b10...)
-- [01:15:20] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-3b10...)
-- [01:11:42] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-3b10...)
-- [01:07:25] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-3b10...)
-- [01:03:59] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-f16f...)
-- [01:02:57] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-f16f...)
-- [00:59:49] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-f16f...)
-- [00:57:43] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-f16f...)
-- [00:56:41] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-124e...)
-- [00:55:38] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-124e...)
-- [00:53:34] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-124e...)
-- [00:49:19] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-124e...)
-- [00:48:14] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-1e99...)
-- [00:46:08] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-1e99...)
-- [00:44:02] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-1e99...)
-- [00:33:15] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-1e99...)
-- [00:30:58] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-1e99...)
-- [00:26:39] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-1e99...)
-- [00:23:25] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-1e99...)
-- [00:16:00] 🧩 Обработан чанк [4/4] в документе: Background Indexing (doc-22f6...)
-- [00:14:52] 🧩 Обработан чанк [3/4] в документе: Background Indexing (doc-22f6...)
-- [00:12:42] 🧩 Обработан чанк [2/4] в документе: Background Indexing (doc-22f6...)
-- [00:09:10] 🧩 Обработан чанк [1/4] в документе: Background Indexing (doc-22f6...)
-- [00:05:38] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-22f6...)
-- [00:01:07] ▶️ Запуск скрипта мониторинга-дашборда V3.0
-- [00:00:25] 📜 API LOG: INFO: Merged: `Natural Language` | 3+3
-- [00:00:25] 📜 API LOG: INFO:  == LLM cache == saving: default:summary:726b02a7233e41481a3695576c9a68c0
-- [00:00:25] 📜 API LOG: INFO: LLMmrg: `Artificial Intelligence` | 5+3
-- [00:00:25] 📜 API LOG: INFO: Merged: `System Design` | 3+1
-- [00:00:25] 📜 API LOG: INFO: Merged: `Developer` | 6+1
-- [00:00:25] 📜 API LOG: INFO:  == LLM cache == saving: default:summary:c42013cb49fca15ed3bd1a063ce48341
-- [00:00:25] 📜 API LOG: INFO: LLMmrg: `Software` | 7+1
-- [00:00:25] 📜 API LOG: INFO: Merged: `Stripe` | 3+2
-- [00:00:25] 📜 API LOG: INFO: Merged: `API` | 5+2
-- [00:00:24] 📜 API LOG: INFO: Merged: `Salesforce` | 2+1
-- [00:00:14] ▶️ Запуск скрипта мониторинга-дашборда V3.0
-- [23:55:08] 🧩 Обработан чанк [5/5] в документе: Background Indexing (doc-a97f...)
-- [23:53:00] 🧩 Обработан чанк [4/5] в документе: Background Indexing (doc-a97f...)
-- [23:49:50] 🧩 Обработан чанк [3/5] в документе: Background Indexing (doc-a97f...)
-- [23:48:42] 🔄 СТАРТ НОВОЙ ПАЧКИ. Baseline RAG: 375
-- [23:47:37] 🧩 Обработан чанк [2/5] в документе: Background Indexing (doc-a97f...)
-- [23:45:25] ▶️ Запуск скрипта мониторинга-дашборда V3.0
-- [23:44:02] 🧩 Обработан чанк [1/5] в документе: Background Indexing (doc-a97f...)
-- [23:39:46] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-a97f...)
-- [23:38:42] 🧩 Обработан чанк [5/5] в документе: Background Indexing (doc-a575...)
-- [23:36:35] 🧩 Обработан чанк [4/5] в документе: Background Indexing (doc-a575...)
-- [23:33:25] 🧩 Обработан чанк [3/5] в документе: Background Indexing (doc-a575...)
-- [23:32:16] 🚨 Ошибка парсинга RAG статистики: Expecting ',' delimiter: line 9804 column 50 (char 480330)
-- [23:30:05] 🧩 Обработан чанк [2/5] в документе: Background Indexing (doc-a575...)
-- [23:27:53] 🧩 Обработан чанк [1/5] в документе: Background Indexing (doc-a575...)
-- [23:26:48] 📜 API LOG: INFO: Merged: `Data` | 1+2
-- [23:26:48] 📜 API LOG: INFO: Merged: `Здравоохранение` | 1+1
-- [23:26:48] 📜 API LOG: INFO: Phase 2: Processing 86 relations from doc-bfadecd24fab8f3bd5fcdbb4d1e3676a (async: 2)
-- [23:26:48] 📜 API LOG: INFO: Phase 3: Updating final 87(80+7) entities and  86 relations from doc-bfadecd24fab8f3bd5fcdbb4d1e3676a
-- [23:26:48] 📜 API LOG: INFO: Completed merging: 80 entities, 7 extra entities, 86 relations
-- [23:26:48] 📜 API LOG: INFO: In memory DB persist to disk
-- [23:26:48] 📜 API LOG: INFO: Completed processing file 4/6: unknown_source
-- [23:26:48] 📜 API LOG: INFO: Extracting stage 5/6: unknown_source
-- [23:26:48] 📜 API LOG: INFO: Processing d-id: doc-a575aaaa8efb89350788b2e482227cb5
-- [23:26:48] 📜 API LOG: INFO:  == LLM cache == saving: default:extract:364fbc17b8a22c5fdd9cacdda5827b04
-- [23:23:30] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-a575...)
-- [23:22:26] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-bfad...)
-- [23:22:26] ▶️ Запуск скрипта мониторинга-дашборда V3.0
-- [23:20:45] 🧩 Обработан чанк [6/6] в текущем документе
-- [23:18:31] 🧩 Обработан чанк [5/6] в текущем документе
-- [23:16:22] 🧩 Обработан чанк [4/6] в текущем документе
-- [23:13:12] 🧩 Обработан чанк [3/6] в текущем документе
-- [23:09:59] 🧩 Обработан чанк [2/6] в текущем документе
-- [23:07:52] 🧩 Обработан чанк [1/6] в текущем документе
-- [23:00:25] 🧩 Обработан чанк [8/8] в текущем документе
-- [22:59:20] 🧩 Обработан чанк [7/8] в текущем документе
-- [22:57:13] 🧩 Обработан чанк [6/8] в текущем документе
-- [22:54:02] 🧩 Обработан чанк [5/8] в текущем документе
-- [22:52:58] 🧩 Обработан чанк [4/8] в текущем документе
-- [22:50:52] 🧩 Обработан чанк [3/8] в текущем документе
-- [22:47:42] 🧩 Обработан чанк [2/8] в текущем документе
-- [22:45:33] 🧩 Обработан чанк [1/8] в текущем документе
-- [22:44:28] ✅ Документ проиндексирован (Neo4j): omnichannel_identity_resolution.md
-- [22:44:26] 🎯 АВТО-КАЛИБРОВКА Baseline: 366
-- [22:44:26] ▶️ Запуск скрипта мониторинга-дашборда V3.0
-- [22:42:09] 🧩 Обработан чанк [5/5] в текущем документе
-- [22:42:09] ✅ Документ проиндексирован (Neo4j): omnichannel_identity_resolution.md
-- [22:41:05] 🧩 Обработан чанк [4/5] в текущем документе
-- [22:38:57] 🧩 Обработан чанк [3/5] в текущем документе
-- [22:35:43] 🧩 Обработан чанк [2/5] в текущем документе
-- [22:33:35] 🧩 Обработан чанк [1/5] в текущем документе
-- [22:32:31] 🧩 Обработан чанк [7/7] в текущем документе
+- [12:56:43] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [12:07:53] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [12:06:49] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [12:02:35] ✅ Документ проиндексирован (Neo4j): ai_automation_case_studies_2025.md
+- [12:01:26] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-4980...)
+- [12:00:18] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-4980...)
+- [11:58:04] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-4980...)
+- [11:56:59] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [11:55:34] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-4980...)
+- [11:43:09] 📜 API LOG: INFO: Phase 2: Processing 30 relations from doc-0fef58caac01eb32b37a355ed9bf2bab (async: 2)
+- [11:43:09] 📜 API LOG: INFO: Chunks appended from relation: `Content`
+- [11:43:09] 📜 API LOG: INFO: Chunks appended from relation: `Action`
+- [11:43:09] 📜 API LOG: INFO: Chunks appended from relation: `Concept`
+- [11:43:09] 📜 API LOG: INFO: Chunks appended from relation: `Concept`
+- [11:43:09] 📜 API LOG: INFO: Phase 3: Updating final 38(38+0) entities and  30 relations from doc-0fef58caac01eb32b37a355ed9bf2bab
+- [11:43:09] 📜 API LOG: INFO: Completed merging: 38 entities, 0 extra entities, 30 relations
+- [11:43:09] 📜 API LOG: INFO: In memory DB persist to disk
+- [11:43:09] 📜 API LOG: INFO: Completed processing file 2/2: docs/knowledge/marketing_direct_response_patterns.md
+- [11:43:09] 📜 API LOG: INFO: Enqueued document processing pipeline stopped
+- [11:32:43] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-0fef...)
+- [11:30:38] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-0fef...)
+- [11:28:32] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-0fef...)
+- [11:25:24] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-0fef...)
+- [11:24:21] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-7820...)
+- [11:22:16] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-7820...)
+- [11:20:10] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-7820...)
+- [11:18:03] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-7820...)
+- [11:16:58] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-e36e...)
+- [11:14:52] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-e36e...)
+- [11:12:45] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-e36e...)
+- [11:09:25] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-e36e...)
+- [11:05:15] 📜 API LOG: INFO: Chunks appended from relation: `Concept`
+- [11:05:15] 📜 API LOG: INFO: Chunks appended from relation: `Niche`
+- [11:05:15] 📜 API LOG: INFO: Chunks appended from relation: `Method`
+- [11:05:15] 📜 API LOG: INFO: Chunks appended from relation: `Concept`
+- [11:05:15] 📜 API LOG: INFO: Chunks appended from relation: `Concept`
+- [11:05:15] 📜 API LOG: INFO: Phase 3: Updating final 63(60+3) entities and  61 relations from doc-73c63b0049640b874b9c6afe71617b67
+- [11:05:15] 📜 API LOG: INFO: Completed merging: 60 entities, 3 extra entities, 61 relations
+- [11:05:15] 📜 API LOG: INFO: In memory DB persist to disk
+- [11:05:15] 📜 API LOG: INFO: Completed processing file 1/1: docs/knowledge/ai_agency_money_strategy_expert.md
+- [11:05:15] 📜 API LOG: INFO: Enqueued document processing pipeline stopped
+- [10:54:48] 🧩 Обработан чанк [5/5] в документе: Background Indexing (doc-73c6...)
+- [10:51:32] 🧩 Обработан чанк [4/5] в документе: Background Indexing (doc-73c6...)
+- [10:48:23] 🧩 Обработан чанк [3/5] в документе: Background Indexing (doc-73c6...)
+- [10:46:12] 🧩 Обработан чанк [2/5] в документе: Background Indexing (doc-73c6...)
+- [10:44:02] 🧩 Обработан чанк [1/5] в документе: Background Indexing (doc-73c6...)
+- [10:40:48] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-73c6...)
+- [10:38:34] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-ba8a...)
+- [10:35:11] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-ba8a...)
+- [10:32:48] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-ba8a...)
+- [06:27:25] 🧩 Обработан чанк [4/4] в документе: Background Indexing (doc-0935...)
+- [06:26:23] 🧩 Обработан чанк [3/4] в документе: Background Indexing (doc-0935...)
+- [06:24:18] 🧩 Обработан чанк [2/4] в документе: Background Indexing (doc-0935...)
+- [06:21:10] 🧩 Обработан чанк [1/4] в документе: Background Indexing (doc-0935...)
+- [06:19:03] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-0935...)
+- [06:15:53] 🧩 Обработан чанк [3/3] в документе: Background Indexing (doc-b929...)
+- [06:14:49] 🧩 Обработан чанк [2/3] в документе: Background Indexing (doc-b929...)
+- [06:12:44] 🧩 Обработан чанк [1/3] в документе: Background Indexing (doc-b929...)
+- [06:09:36] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-b929...)
+- [06:09:36] 🧩 Обработан чанк [2/2] в документе: Background Indexing (doc-b929...)
+- [06:08:33] 🧩 Обработан чанк [1/2] в документе: Background Indexing (doc-ce54...)
+- [06:06:29] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-ce54...)
+- [06:06:28] 🧩 Обработан чанк [2/2] в документе: Background Indexing (doc-ce54...)
+- [06:04:24] 🧩 Обработан чанк [1/2] в документе: Background Indexing (doc-3582...)
+- [06:01:17] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-3582...)
+- [06:01:17] 🧩 Обработан чанк [2/2] в документе: Background Indexing (doc-3582...)
+- [06:00:14] 🧩 Обработан чанк [1/2] в документе: Background Indexing (doc-c9c5...)
+- [05:58:07] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-c9c5...)
+- [05:57:05] 🧩 Обработан чанк [2/2] в документе: Background Indexing (doc-033c...)
+- [05:54:58] 🧩 Обработан чанк [1/2] в документе: Background Indexing (doc-033c...)
+- [05:53:55] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-033c...)
+- [05:52:52] 🧩 Обработан чанк [2/2] в документе: Background Indexing (doc-b9e9...)
+- [05:51:48] 🧩 Обработан чанк [1/2] в документе: Background Indexing (doc-b9e9...)
+- [05:49:44] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-b9e9...)
+- [05:49:44] 🧩 Обработан чанк [2/2] в документе: Background Indexing (doc-b9e9...)
+- [05:48:41] 🧩 Обработан чанк [1/2] в документе: Background Indexing (doc-8846...)
+- [05:46:36] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-8846...)
+- [05:46:35] 🧩 Обработан чанк [2/2] в документе: Background Indexing (doc-8846...)
+- [05:45:32] 🧩 Обработан чанк [1/2] в документе: Background Indexing (doc-f462...)
+- [05:43:27] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-f462...)
+- [05:42:24] 🧩 Обработан чанк [7/7] в документе: Background Indexing (doc-21a2...)
+- [05:40:18] 🧩 Обработан чанк [6/7] в документе: Background Indexing (doc-21a2...)
+- [05:38:12] 🧩 Обработан чанк [5/7] в документе: Background Indexing (doc-21a2...)
+- [05:35:04] 🧩 Обработан чанк [4/7] в документе: Background Indexing (doc-21a2...)
+- [05:32:59] 🧩 Обработан чанк [3/7] в документе: Background Indexing (doc-21a2...)
+- [05:30:54] 🧩 Обработан чанк [2/7] в документе: Background Indexing (doc-21a2...)
+- [05:28:49] 🧩 Обработан чанк [1/7] в документе: Background Indexing (doc-21a2...)
+- [05:26:43] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-21a2...)
+- [05:23:34] 🧩 Обработан чанк [7/7] в документе: Background Indexing (doc-734b...)
+- [05:21:29] 🧩 Обработан чанк [6/7] в документе: Background Indexing (doc-734b...)
+- [05:19:24] 🧩 Обработан чанк [5/7] в документе: Background Indexing (doc-734b...)
+- [05:18:21] 🧩 Обработан чанк [4/7] в документе: Background Indexing (doc-734b...)
+- [05:16:16] 🧩 Обработан чанк [3/7] в документе: Background Indexing (doc-734b...)
+- [05:13:08] 🧩 Обработан чанк [2/7] в документе: Background Indexing (doc-734b...)
+- [05:12:05] 🧩 Обработан чанк [1/7] в документе: Background Indexing (doc-734b...)
+- [05:09:57] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-734b...)
+- [05:08:53] 🧩 Обработан чанк [9/9] в документе: Background Indexing (doc-c412...)
+- [05:06:47] 🧩 Обработан чанк [8/9] в документе: Background Indexing (doc-c412...)
+- [05:04:44] 🧩 Обработан чанк [7/9] в документе: Background Indexing (doc-c412...)
+- [05:02:39] 🧩 Обработан чанк [6/9] в документе: Background Indexing (doc-c412...)
