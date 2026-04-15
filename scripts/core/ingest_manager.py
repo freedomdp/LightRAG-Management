@@ -15,7 +15,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 API_URL = "http://localhost:9621/documents/text"
-CONTENT_DIR = "docs/knowledge"
+# Directories containing documents for RAG
+DOCUMENT_DIRS = [
+    "docs/knowledge",
+    "docs/experience"
+]
 STATUS_FILE = "temp/ingest_status.json"
 REGISTRY_FILE = "temp/ingest_registry.json"
 
@@ -118,34 +122,37 @@ def ingest_file(filepath, rel_filename):
         return False
 
 def main():
-    if not os.path.exists(CONTENT_DIR):
-        logger.error(f"Directory {CONTENT_DIR} not found.")
+    # Recursive search for .md files across all configured directories
+    all_files_info = []
+    for directory in DOCUMENT_DIRS:
+        if not os.path.exists(directory):
+            logger.warning(f"Directory {directory} not found, skipping...")
+            continue
+            
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                if file.endswith('.md'):
+                    abs_path = os.path.join(root, file)
+                    # We use relative path from the current working directory as the unique key
+                    rel_path = os.path.relpath(abs_path, os.getcwd())
+                    all_files_info.append({"abs": abs_path, "rel": rel_path})
+    
+    all_files_info.sort(key=lambda x: x["rel"])
+    
+    if not all_files_info:
+        logger.warning(f"No .md files found in {DOCUMENT_DIRS}")
         return
 
-    # Recursive search for .md files
-    all_files = []
-    for root, dirs, files in os.walk(CONTENT_DIR):
-        for file in files:
-            if file.endswith('.md'):
-                # Store relative path from CONTENT_DIR
-                rel_path = os.path.relpath(os.path.join(root, file), CONTENT_DIR)
-                all_files.append(rel_path)
-    
-    all_files.sort()
-    
-    if not all_files:
-        logger.warning(f"No .md files found in {CONTENT_DIR}")
-        return
-
-    total = len(all_files)
-    logger.info(f"Found {total} files for ingestion.")
+    total = len(all_files_info)
+    logger.info(f"Found {total} files for ingestion across {len(DOCUMENT_DIRS)} directories.")
     
     # Trigger safety backup before ingestion starts
     run_backup()
     
-    for i, rel_filename in enumerate(all_files):
+    for i, file_info in enumerate(all_files_info):
         current_idx = i + 1
-        filepath = os.path.join(CONTENT_DIR, rel_filename)
+        filepath = file_info["abs"]
+        rel_filename = file_info["rel"]
         
         # Check if file is already in registry to skip processing
         registry = {}
@@ -168,7 +175,8 @@ def main():
         success = ingest_file(filepath, rel_filename)
         
         if success:
-            time.sleep(12) # Delay between documents to allow system cooling
+            # Short delay for system stability
+            time.sleep(12) 
         else:
             logger.error(f"Failed to ingest {rel_filename}, continuing with next...")
 

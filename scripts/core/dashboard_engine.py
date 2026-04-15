@@ -227,29 +227,40 @@ class DashboardEngine:
     def build_dashboard(self):
         now = time.time()
         
-        # 0. Physical folder scan (Ground Truth Total - Recursive)
-        CONTENT_DIR = "docs/knowledge"
+        # 0. Physical folder scan (Ground Truth Total - Recursive across all dirs)
+        DOCUMENT_DIRS = ["docs/knowledge", "docs/experience"]
         total_doc_physical = 0
+        current_rel_paths = set()
         try:
-            if os.path.exists(CONTENT_DIR):
-                for root, dirs, files in os.walk(CONTENT_DIR):
-                    for f in files:
-                        if f.endswith(".md"):
-                            total_doc_physical += 1
+            for directory in DOCUMENT_DIRS:
+                if os.path.exists(directory):
+                    for root, dirs, files in os.walk(directory):
+                        for f in files:
+                            if f.endswith(".md"):
+                                abs_path = os.path.join(root, f)
+                                rel_path = os.path.relpath(abs_path, os.getcwd())
+                                current_rel_paths.add(rel_path)
+                                total_doc_physical += 1
         except Exception:
-            total_doc_physical = 0
+            pass
 
         # 1. Get RAG stats (Ground Truth Processed)
         rag_stats = self.gather_rag_stats()
         
+        # 1.1 Metrics for decision making
+        metrics, ollama_cpu_str, ollama_status, ollama_cpu_total = self.gather_system_metrics()
+        
         # Cross-reference with registry for accurate batch progress
         self.load_registry()
+        # 1.1 Calculate processed count ONLY for files existing in configured directories
         processed_count = 0
         doc_status_data = self.safe_load_json(DOC_STATUS_FILE) or {}
         
         for doc_id, info in self.registry.items():
-            if doc_status_data.get(doc_id, {}).get("status") == "processed":
-                processed_count += 1
+            rel_path = info.get("filename") # Now stores relative path from root
+            if rel_path in current_rel_paths:
+                if doc_status_data.get(doc_id, {}).get("status") == "processed" or info.get("status") == "processed":
+                    processed_count += 1
         
         # 2. Get ingest status for "Current Activity"
         ingest_data = self.get_ingest_status()
@@ -413,5 +424,9 @@ class DashboardEngine:
                 self._log_event(f"🚨 Внутренняя ошибка скрипта дашборда: {e}")
 
 if __name__ == "__main__":
+    import sys
     engine = DashboardEngine()
-    engine.loop()
+    if "--run-once" in sys.argv:
+        engine.build_dashboard()
+    else:
+        engine.loop()
