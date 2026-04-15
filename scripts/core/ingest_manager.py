@@ -51,7 +51,8 @@ def register_mapping(doc_id, filename):
         
         registry[doc_id] = {
             "filename": filename,
-            "registered_at": time.time()
+            "registered_at": time.time(),
+            "status": "processed"
         }
         
         with open(REGISTRY_FILE, "w") as f:
@@ -97,8 +98,15 @@ def ingest_file(filepath, rel_filename):
             if doc_id:
                 register_mapping(doc_id, rel_filename)
                 logger.info(f"Successfully processed {filepath}. DocID: {doc_id}")
+            elif res_data.get("status") == "duplicated" and "processed" in res_data.get("message", "").lower():
+                # Use a unique key for the registry to avoid overwriting duplicates
+                file_hash = hashlib.md5(rel_filename.encode()).hexdigest()
+                register_mapping(f"doc-hash-{file_hash}", rel_filename)
+                logger.info(f"File {rel_filename} already exists in DB. Registered with hash key.")
+
             else:
                 logger.warning(f"Could not resolve DocID for {filepath}. API Response: {res_data}")
+
             
             return True
             
@@ -148,9 +156,10 @@ def main():
             except:
                 pass
         
-        # Check if any entry in registry has this filename
-        if any(v.get("filename") == rel_filename for v in registry.values()):
-            logger.info(f"[{current_idx}/{total}] Skipping {rel_filename} (Already in registry)")
+        # Check if file is already processed in registry to skip
+        processed_entry = next((v for v in registry.values() if v.get("filename") == rel_filename), None)
+        if processed_entry and processed_entry.get("status") == "processed":
+            logger.info(f"[{current_idx}/{total}] Skipping {rel_filename} (Already processed)")
             continue
 
         logger.info(f"[{current_idx}/{total}] Ingesting {rel_filename}...")

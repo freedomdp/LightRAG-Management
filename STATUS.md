@@ -1,22 +1,43 @@
-Обновлено: `2026-04-15 21:22:51` (Авто-обновление: 60 сек)
+Обновлено: `2026-04-16 00:37:33` (Авто-обновление: 60 сек)
 
-## ⚡ Статус Индексации: ⏸️ Приостановлено (По требованию)
-- **Прогресс пачки**: `[Ожидание]`
-- **RAG API**: `[Кэшировано / Остановлено]`
-- **Dashboard Engine**: `[Остановлен]`
-- **Контейнеры (Docker)**: `[Восстановлены / Stopped]`
-- **n8n / Tunnels**: `[Остановлены]`
+## ⚡ Статус Индексации: 🛑 ЗАВИСАНИЕ
+- **Прогресс пачки**: `[30/39] (76.9%)`
+- **Всего в RAG**: `434 (всего в базе)`
+- **Прогресс частей (Чанки)**: `[2/2]`
+- **Лимиты ресурсов (Throttling)**: `✅ Active (Max 80% CPU)`
+- **Активность LLM (GPU/Ollama)**: 💤 LLM простаивает
 
-### 🖥️ Системные ресурсы (Состояние: Простой)
+
+### 🖥️ Системные ресурсы (Docker & Mac)
 | Компонент / Контейнер | Нагрузка (CPU %) | RAM / Mem | Статус |
 | :--- | :--- | :--- | :--- |
-| **Ollama (Metal GPU)** | 0.00% | N/A | 💤 Idle |
-| **LightRAG API** | 0.00% | 0MB | 🛑 Stopped |
-| **Neo4j DB** | 0.00% | 0MB | 🛑 Stopped |
-| **Qdrant DB** | 0.00% | 0MB | 🛑 Stopped |
-| **n8n / Tunnels** | 0.00% | 0MB | 🛑 Stopped |
+| **Ollama (Metal GPU)** | 0.00% | N/A | 💤 LLM простаивает |
+| **LightRAG API** | 0.55% | 481.1MiB | ✅ Online |
+| **Neo4j DB** | 0.82% | 683.9MiB | ✅ Online |
+| **Qdrant DB** | 0.29% | 202.5MiB | ✅ Online |
 
 ## 📜 Недавняя активность (Самые новые - сверху)
+- [00:37:31] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [00:37:23] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [00:37:15] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [00:37:08] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [00:37:01] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:35351 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:24899 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:54880 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:21146 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:37584 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:20335 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:41939 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:62255 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:48733 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 📜 API LOG: INFO: 192.168.65.1:59715 - "POST /documents/text HTTP/1.1" 200
+- [00:36:43] 🚨 ВНИМАНИЕ: Прогресс не меняется более 10 минут. Возможна блокировка GPU или Neo4j.
+- [00:35:39] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [00:34:16] ▶️ Запуск скрипта мониторинга-дашборда V3.0
+- [00:25:59] ✅ Документ проиндексирован (Neo4j): Background Indexing (doc-4486...)
+- [00:25:58] 🧩 Обработан чанк [2/2] в документе: Background Indexing (doc-4486...)
+- [00:25:58] ▶️ Запуск скрипта мониторинга-дашборда V3.0
 - [20:52:58] 🧩 Обработан чанк [3/5] в документе: browseract_encyclopedia_youtube_ru.md
 - [20:38:30] 🧩 Обработан чанк [2/5] в документе: browseract_encyclopedia_youtube_ru.md
 - [20:17:31] 🧩 Обработан чанк [1/5] в документе: browseract_encyclopedia_youtube_ru.md
@@ -96,24 +117,3 @@
 - [17:46:15] 📜 API LOG: INFO: Final context: 66 entities, 161 relations, 20 chunks
 - [17:46:15] 📜 API LOG: INFO: Final chunks S+F/O: E3/1 R3/1 E5/2 R1/2 E5/3 R1/3 E4/4 R3/4 E4/5 R1/5 E4/6 R1/6 E4/7 R2/7 E5/8 R2/8 E3/9 R4/9 E3/10 R3/10
 - [17:46:15] 📜 API LOG: INFO:  == LLM cache == saving: hybrid:query:9029d91b42acd0100daf3db30242ca4e
-- [17:42:03] 📜 API LOG: INFO: Selecting 198 from 393 entity-related chunks by weighted polling
-- [17:42:03] 📜 API LOG: INFO: Find 117 additional chunks in 70 relations (deduplicated 57)
-- [17:42:03] 🚨 ERROR LOG: WARNING: Vector similarity chunk selection: found 25 but expecting 117
-- [17:42:03] 🚨 ERROR LOG: WARNING: No relation-related chunks selected by vector similarity, falling back to WEIGHT method
-- [17:42:03] 📜 API LOG: INFO: Selecting 117 from 117 relation-related chunks by weighted polling
-- [17:42:03] 📜 API LOG: INFO: Round-robin merged chunks: 315 -> 315 (deduplicated 0)
-- [17:42:03] 🚨 ERROR LOG: WARNING: Rerank is enabled but no rerank model is configured. Please set up a rerank model or set enable_rerank=False in query parameters.
-- [17:42:03] 📜 API LOG: INFO: Final context: 66 entities, 161 relations, 20 chunks
-- [17:42:03] 📜 API LOG: INFO: Final chunks S+F/O: E3/1 R3/1 E5/2 R1/2 E5/3 R1/3 E4/4 R3/4 E4/5 R1/5 E4/6 R1/6 E4/7 R2/7 E5/8 R2/8 E3/9 R4/9 E3/10 R3/10
-- [17:42:03] 📜 API LOG: INFO:  == LLM cache == saving: hybrid:query:9029d91b42acd0100daf3db30242ca4e
-- [17:39:58] 📜 API LOG: INFO: Selecting 198 from 393 entity-related chunks by weighted polling
-- [17:39:58] 📜 API LOG: INFO: Find 117 additional chunks in 70 relations (deduplicated 57)
-- [17:39:58] 🚨 ERROR LOG: WARNING: Vector similarity chunk selection: found 25 but expecting 117
-- [17:39:58] 🚨 ERROR LOG: WARNING: No relation-related chunks selected by vector similarity, falling back to WEIGHT method
-- [17:39:58] 📜 API LOG: INFO: Selecting 117 from 117 relation-related chunks by weighted polling
-- [17:39:58] 📜 API LOG: INFO: Round-robin merged chunks: 315 -> 315 (deduplicated 0)
-- [17:39:58] 🚨 ERROR LOG: WARNING: Rerank is enabled but no rerank model is configured. Please set up a rerank model or set enable_rerank=False in query parameters.
-- [17:39:58] 📜 API LOG: INFO: Final context: 66 entities, 161 relations, 20 chunks
-- [17:39:58] 📜 API LOG: INFO: Final chunks S+F/O: E3/1 R3/1 E5/2 R1/2 E5/3 R1/3 E4/4 R3/4 E4/5 R1/5 E4/6 R1/6 E4/7 R2/7 E5/8 R2/8 E3/9 R4/9 E3/10 R3/10
-- [17:39:58] 📜 API LOG: INFO:  == LLM cache == saving: hybrid:query:9029d91b42acd0100daf3db30242ca4e
-- [17:35:46] 📜 API LOG: INFO: Selecting 198 from 393 entity-related chunks by weighted polling

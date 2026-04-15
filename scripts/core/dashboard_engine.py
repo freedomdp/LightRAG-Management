@@ -41,22 +41,19 @@ class DashboardEngine:
 
     def load_registry(self):
         if os.path.exists(INGEST_REGISTRY_FILE):
-            try:
-                with open(INGEST_REGISTRY_FILE, "r", encoding="utf-8") as f:
-                    self.registry = json.load(f)
-            except Exception:
-                pass
+            data = self.safe_load_json(INGEST_REGISTRY_FILE)
+            if data:
+                self.registry = data
+            else:
+                self.registry = {}
 
     def load_state(self):
         if os.path.exists(STATE_FILE):
-            try:
-                with open(STATE_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    # Merge carefully avoiding overwriting initial keys if they are missing
-                    for k, v in data.items():
-                        self.state[k] = v
-            except Exception as e:
-                self._log_event(f"🚨 Ошибка загрузки state: {e}")
+            data = self.safe_load_json(STATE_FILE)
+            if data:
+                # Merge carefully avoiding overwriting initial keys if they are missing
+                for k, v in data.items():
+                    self.state[k] = v
 
     def save_state(self):
         # Truncate journal to 100 entries to prevent infinite growth
@@ -230,15 +227,15 @@ class DashboardEngine:
     def build_dashboard(self):
         now = time.time()
         
-        # 0. Physical folder scan (Ground Truth Total)
+        # 0. Physical folder scan (Ground Truth Total - Recursive)
         CONTENT_DIR = "docs/knowledge"
-        files_in_folder = []
+        total_doc_physical = 0
         try:
             if os.path.exists(CONTENT_DIR):
-                for f in os.listdir(CONTENT_DIR):
-                    if f.endswith(".md"):
-                        files_in_folder.append(f)
-            total_doc_physical = len(files_in_folder)
+                for root, dirs, files in os.walk(CONTENT_DIR):
+                    for f in files:
+                        if f.endswith(".md"):
+                            total_doc_physical += 1
         except Exception:
             total_doc_physical = 0
 
@@ -333,6 +330,7 @@ class DashboardEngine:
             if is_stalled:
                 general_status = "🛑 ЗАВИСАНИЕ"
                 if not self.state.get("stall_logged"):
+                    self._log_event("🚨 ВНИМАНИЕ: Прогресс не меняется более 10 минут. Возможна блокировка GPU или Neo4j.")
                     self.capture_error_log()
                     self.state["stall_logged"] = True
                     self.save_state()
@@ -340,10 +338,13 @@ class DashboardEngine:
                 if is_hard_working or active_work > 0:
                      reason = "в очереди" if active_work > 0 else "активно"
                      general_status = f"Индексация ({reason})"
+                elif ollama_cpu_total > 0.5:
+                     general_status = "Индексация (LLM активна)"
                 else:
                      general_status = "Ожидание / Завершение"
                 
                 if self.state.get("stall_logged"):
+                    self._log_event("✅ Процесс возобновил движение.")
                     self.state["stall_logged"] = False
                     self.save_state()
 
