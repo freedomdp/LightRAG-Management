@@ -1,43 +1,26 @@
-# 📋 HLV-Board: Активные Задачи
+# HLV Project Board: AI Agency Market Intelligence
 
-> **Цикл**: Specification → Planning → [Human Validation] → Execution → Verification → Learning
+## Phase 1: Specification & Planning [COMPLETED]
+- [x] Определение бизнес-модели M.O.N.E.Y. v2.0
+- [x] Согласование лимита в 100 отзывов и аудита репутации
+- [x] План реализации v2.1 утвержден (логика сбора и анализа)
 
----
+## Phase 2: Mapping Engine (Data Acquisition) [/]
+- [ ] Исследование API Outscraper для выгрузки 100 отзывов + ответов бизнеса
+- [ ] Разработка `scripts/core/mapping_engine.py` (Сборщик данных)
+- [ ] Тестирование сбора данных на 3 тестовых компаниях
 
-## 🟢 [COMPLETED] Реструктуризация проекта под HLV/SDD v18.0
+## Phase 3: Pain & Reputation Analysis [/]
+- [ ] Создание промптов для `pain_analyser.py` (Анализ 100 отзывов + Работа с негативом)
+- [ ] Генерация JSON-профиля компании (Lead DNA)
+- [ ] Подготовка текста для 1-го письма на основе реальных "болей" и "пробелов в ответах"
 
-**Спецификация**: Привести проект к полному соответствию методологии HLV/SDD — единая Конституция, чистая архитектура папок, рабочий процесс со строгими чекпоинтами.
-
-**Validation**: ✅ Одобрено пользователем 2026-04-14 01:57
-
-**Выполнено**:
-- [x] Создана единая Конституция `project.md` (v18.0)
-- [x] Удалены дубликаты `docs/project.md`, `docs/STATUS.md`
-- [x] `scripts/` реорганизован: `core/` + `utils/` + `archive/`
-- [x] Удалены `.broken`, `.corrupt`, `.log` файлы
-- [x] Обновлён `.gitignore` (comprehensive rules)
-- [x] Git commit зафиксирован
-
----
-
-## 🔵 [SPECIFICATION] Следующий шаг: Первый ИИ-Агент для Бизнеса
-
-**Идея**: Собрать первый production-ready ИИ-агент на базе n8n для одной из проработанных ниш (Anti-Freeze + Omnichannel + Handoff).
-
-**Кандидаты на первый кейс**:
-- [ ] Кондиционеры: Pre-diagnostic агент (мультимодальный)
-- [ ] Салон красоты/маникюр: Retention & Reputation Engine
-- [ ] Универсальный: Lead Capture бот для агентства (для себя)
+## Phase 4: Verification & Pre-Outreach [ ]
+- [ ] Валидация точности анализа через HLV (Human validation)
+- [ ] Генерация пробного письма и структуры лендинга
+- [ ] Подготовка к интеграции с WordPress (в будущем)
 
 ---
-
-## 📐 Как использовать этот файл
-
-```
-## [SPECIFICATION] Название задачи — Что и Почему
-## [PLANNING] Декомпозиция — файлы, API, данные
-## [VALIDATION] ← Ждём Human Approval перед началом
-## [EXECUTION] — [ ] Атомарные шаги кода
-## [VERIFICATION] — Как проверяем результат
-## [LEARNING] — log_new_experience + Git commit
-```
+*Статус: Готов к разработке `mapping_engine.py`.*
+- [ ] Подготовка ТЗ для n8n ворклоу (M.O.N.E.Y. Engine) - В РАБОТЕ (Ждет фидбека)
+- [ ] Проработка гибридной архитектуры Agency-Base (SQLite + LightRAG) - ЖДЕТ РЕШЕНИЯ

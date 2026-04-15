@@ -1,8 +1,9 @@
 import json
 import urllib.request
 import os
+import sys
 
-def surgical_purge_failed():
+def surgical_purge(target_statuses=["failed", "pending"], target_ids=None):
     status_path = "/Users/sergej/StudioProjects/LightRAG/rag_storage/kv_store_doc_status.json"
     api_url = "http://localhost:9621/documents/delete_document"
     
@@ -10,7 +11,6 @@ def surgical_purge_failed():
         print(f"Error: status file not found at {status_path}")
         return
 
-    print(f"Reading status: {status_path}")
     with open(status_path, "r", encoding="utf-8") as f:
         try:
             data = json.load(f)
@@ -18,24 +18,27 @@ def surgical_purge_failed():
             print(f"Error parsing JSON: {e}")
             return
 
-    # Находим все ID со статусом failed
-    failed_ids = []
-    for doc_id, doc_info in data.items():
-        if doc_info.get("status") == "failed":
-            failed_ids.append(doc_id)
+    # Find IDs to delete
+    ids_to_purge = []
+    if target_ids:
+        ids_to_purge = [tid for tid in target_ids if tid in data]
+    else:
+        for doc_id, doc_info in data.items():
+            if doc_info.get("status") in target_statuses:
+                ids_to_purge.append(doc_id)
 
-    if not failed_ids:
-        print("No 'failed' documents found to delete.")
+    if not ids_to_purge:
+        print(f"No documents found with statuses {target_statuses} to delete.")
         return
 
-    print(f"Found {len(failed_ids)} 'failed' documents. Sending delete requests...")
+    print(f"Found {len(ids_to_purge)} documents to purge. Sending delete requests...")
 
-    # Разбиваем на чанки по 50
+    # Batch into chunks of 50
     chunk_size = 50
     success_count = 0
     
-    for i in range(0, len(failed_ids), chunk_size):
-        chunk = failed_ids[i:i + chunk_size]
+    for i in range(0, len(ids_to_purge), chunk_size):
+        chunk = ids_to_purge[i:i + chunk_size]
         payload = {
             "doc_ids": chunk,
             "delete_file": False,
@@ -62,4 +65,5 @@ def surgical_purge_failed():
     return success_count > 0
 
 if __name__ == "__main__":
-    surgical_purge_failed()
+    # If run directly as script, purge failed and pending
+    surgical_purge()

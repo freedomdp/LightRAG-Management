@@ -5,6 +5,7 @@ import time
 import logging
 import hashlib
 import re
+import subprocess
 
 # Setup logging
 logging.basicConfig(
@@ -17,6 +18,15 @@ API_URL = "http://localhost:9621/documents/text"
 CONTENT_DIR = "docs/knowledge"
 STATUS_FILE = "temp/ingest_status.json"
 REGISTRY_FILE = "temp/ingest_registry.json"
+
+def run_backup():
+    """Triggers automated safety backup before ingestion."""
+    try:
+        script_path = os.path.join(os.path.dirname(__file__), "backup_manager.py")
+        logger.info("📦 [Integrity Guard] Triggering pre-ingest safety backup...")
+        subprocess.run(["python3", script_path, "--backup", "--label", "pre_ingest", "--cleanup"], check=True)
+    except Exception as e:
+        logger.error(f"❌ Automatic backup failed: {e}")
 
 def update_status(current, total, filename):
     try:
@@ -122,10 +132,27 @@ def main():
     total = len(all_files)
     logger.info(f"Found {total} files for ingestion.")
     
+    # Trigger safety backup before ingestion starts
+    run_backup()
+    
     for i, rel_filename in enumerate(all_files):
         current_idx = i + 1
         filepath = os.path.join(CONTENT_DIR, rel_filename)
         
+        # Check if file is already in registry to skip processing
+        registry = {}
+        if os.path.exists(REGISTRY_FILE):
+            try:
+                with open(REGISTRY_FILE, "r") as f:
+                    registry = json.load(f)
+            except:
+                pass
+        
+        # Check if any entry in registry has this filename
+        if any(v.get("filename") == rel_filename for v in registry.values()):
+            logger.info(f"[{current_idx}/{total}] Skipping {rel_filename} (Already in registry)")
+            continue
+
         logger.info(f"[{current_idx}/{total}] Ingesting {rel_filename}...")
         update_status(current_idx, total, rel_filename)
         
