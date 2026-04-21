@@ -11,6 +11,9 @@ services:
     environment:
       - NEO4J_AUTH=${NEO4J_USERNAME}/${NEO4J_PASSWORD}
       - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_server_memory_heap_initial__size=3G
+      - NEO4J_server_memory_heap_max__size=3G
+      - NEO4J_server_memory_pagecache_size=1G
     volumes:
       - ./neo4j_data:/data
       - ./neo4j_logs:/logs
@@ -20,6 +23,7 @@ services:
       resources:
         limits:
           cpus: '2.0'
+          memory: 5G
     healthcheck:
       test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:7474 || exit 1"]
       interval: 10s
@@ -36,6 +40,11 @@ services:
       - ./qdrant_data:/qdrant/storage
     networks:
       - lightrag_net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
 
   # LightRAG Server
   lightrag:
@@ -52,7 +61,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '6.0'
+          cpus: '4.0'
+          memory: 4G
     depends_on:
       neo4j:
         condition: service_healthy

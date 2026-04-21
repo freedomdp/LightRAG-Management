@@ -26,7 +26,7 @@
 | **MCP** | `scripts/mcp_lightrag.py` | Протокол связи Antigravity ↔ LightRAG |
 | **Оркестрация** | n8n (Docker) | Workflow-автоматизация, Telegram-бот |
 | **Инфраструктура** | Docker Compose | Контейнеризация всех сервисов |
-| **Источник знаний** | NotebookLM (Gemini 2.5) | Первичный источник для JIT-индексации |
+| **Источник знаний** | NotebookLM (Gemini 3.0) | Первичный источник для JIT-индексации |
 
 ---
 
@@ -67,6 +67,15 @@ LightRAG/
 ├── backups/                # Архивы бэкапов (backup_YYYYMMDD_HHMMSS.zip)
 └── temp/                   # Временные данные, логи (в .gitignore)
 ```
+
+---
+
+## 🛡️ Безопасность и Целостность (DB Sanctity)
+
+1. **Главная ценность**: База данных (21 000+ узлов) является смысловым центром проекта. Ее удаление или «очистка» (reset) КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНЫ.
+2. **Резервное копирование**: Перед любым изменением инфраструктуры (Docker, Neo4j, настройки API) ОБЯЗАТЕЛЬНО создание бэкапа в папку `backups/`.
+3. **Оптимизация**: Все проблемы с производительностью решаются исключительно через ограничение ресурсов (CPU/RAM limits) или тюнинг параметров, но никогда — через удаление знаний.
+4. **Языковой стандарт**: Вся документация, планы (SDD/HLV), задачи (task.md) и отчеты ведутся ИСКЛЮЧИТЕЛЬНО на РУССКОМ языке.
 
 ---
 
@@ -203,6 +212,17 @@ Constitution (project.md)
 ## 📚 Ключевые Ресурсы
 
 - **NotebookLM (Основной)**: [AI Автоматизация / LightRAG Management](https://notebooklm.google.com/notebook/b3977ee0-e50b-4d9a-a7e3-2d3deb9c1cef)
+- **Google Sheets Integration**
+- **Spreadsheet ID**: `1W0LEztgC8mm3xTXbcA4JsYvlbG64QmHAMHegamKcLmk`
+- **Sheet "Посилання"**: Source matrix of URLs (Shop Name, CSS Selector, Model URLs).
+- **Sheet "Ціни"**: Target matrix for the monitored prices.
+- **Requirement**: STRICT exact match for model names between sheets. Column headers must align perfectly.
+
+## Технические настройки (n8n + Browserless)
+- **Local Browser**: `http://browserless:3000/scrape`
+- **Strategy**: Headless scraping with resource rejection (images/fonts disabled).
+- **Trigger**: Full matrix scan (parallel items).
+
 - **LightRAG API**: `http://localhost:9621`
 - **Neo4j Browser**: `http://localhost:7474`
 - **Qdrant UI**: `http://localhost:6333/dashboard`

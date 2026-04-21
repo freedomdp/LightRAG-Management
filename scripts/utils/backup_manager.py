@@ -5,7 +5,7 @@ import subprocess
 from datetime import datetime
 
 # Настройки путей
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BACKUP_DIR = os.path.join(PROJECT_ROOT, "backups")
 FOLDERS_TO_BACKUP = [
     "rag_storage",
